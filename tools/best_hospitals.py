@@ -1,14 +1,16 @@
 """
 Best Hospitals tool.
 
-Pulls the latest "best hospital" lists for the United States from two
-sources and normalizes them into a common row shape:
+Serves the latest U.S. "best hospital" lists from two sources, normalized to:
 
-    {"rank": <int|None>, "hospital": str, "city": str, "state": str, "score": str}
+    {"rank": int|None, "hospital": str, "city": str, "state": str,
+     "score": str, "website": str, "website_display": str}
 
-It tries a live fetch first; if the source can't be reached or parsed it
-falls back to the versioned offline snapshot in ``hospitals_data.py`` and
-reports which path was used so the UI can show a clear "live / cached" badge.
+We serve the curated, versioned snapshot in ``hospitals_data.py`` rather than a
+live scrape: the ranking sites are JavaScript-rendered and bot-protected, so a
+server-side scrape only recovers partial rows. Since this is yearly data, the
+offline snapshot is the reliable source of truth. Set ALLOW_LIVE_FETCH = True
+to experiment with a live fetch (only accepted if it returns full columns).
 """
 from __future__ import annotations
 
@@ -18,10 +20,12 @@ import re
 
 try:
     import requests
-except Exception:  # pragma: no cover - requests is in requirements.txt
+except Exception:  # requests is listed in requirements.txt
     requests = None
 
 from . import hospitals_data as DATA
+
+ALLOW_LIVE_FETCH = False
 
 SOURCES = {
     "usnews": {
@@ -51,42 +55,37 @@ HEADERS = {
 def _normalize(rows, ordinal):
     out = []
     for r in rows:
+        website = (r.get("website") or "").strip()
+        display = website.replace("https://", "").replace("http://", "").rstrip("/")
         out.append(
             {
                 "rank": r.get("rank") if ordinal else None,
-                "hospital": r.get("hospital", "").strip(),
-                "city": r.get("city", "").strip(),
-                "state": r.get("state", "").strip(),
-                "score": r.get("score", "").strip(),
+                "hospital": (r.get("hospital") or "").strip(),
+                "city": (r.get("city") or "").strip(),
+                "state": (r.get("state") or "").strip(),
+                "score": (r.get("score") or "").strip(),
+                "website": website,
+                "website_display": display,
             }
         )
     return out
 
 
 def _try_live_newsweek():
-    """Attempt to scrape the live Newsweek US ranking table."""
     if requests is None:
         return None
     try:
         resp = requests.get(DATA.NEWSWEEK_SOURCE_URL, headers=HEADERS, timeout=12)
         if resp.status_code != 200 or len(resp.text) < 2000:
             return None
-        html = resp.text
-        # The page is largely client-rendered; rows occasionally appear in the
-        # static HTML. Be conservative: only accept a live result if we can
-        # recover a sensible number of ranked rows.
-        rows = _parse_newsweek_html(html)
-        if len(rows) >= 25:
-            return rows
-        return None
+        rows = _parse_newsweek_html(resp.text)
+        return rows if len(rows) >= 25 else None
     except Exception:
         return None
 
 
 def _parse_newsweek_html(html):
-    """Best-effort parser for Newsweek's ranking rows from raw HTML."""
     rows = []
-    # Rows look like: <td>1</td> ... <a ...>Hospital Name</a> ... <td>City</td><td>State</td>
     pattern = re.compile(
         r"<tr[^>]*>.*?>(\d{1,3})<.*?<a[^>]*>(.*?)</a>.*?</tr>",
         re.IGNORECASE | re.DOTALL,
@@ -95,19 +94,11 @@ def _parse_newsweek_html(html):
         rank = int(m.group(1))
         name = re.sub(r"<[^>]+>", "", m.group(2)).strip()
         if name:
-            rows.append({"rank": rank, "hospital": name, "city": "", "state": "", "score": ""})
+            rows.append({"rank": rank, "hospital": name, "city": "", "state": "", "score": "", "website": ""})
     return rows
 
 
 def get_hospitals(source: str):
-    """
-    Returns (rows, meta).
-
-    meta = {
-        "source": key, "label": ..., "edition": ..., "url": ...,
-        "ordinal": bool, "live": bool, "count": int, "note": str,
-    }
-    """
     if source not in SOURCES:
         source = "newsweek"
     info = SOURCES[source]
@@ -115,17 +106,8 @@ def get_hospitals(source: str):
     rows = None
     live = False
 
-    # NOTE: We intentionally serve the curated, versioned snapshot rather than
-    # the live scrape. The ranking sites are JavaScript-rendered, so a server
-    # scrape only recovers partial rows (rank + name, with empty city/state/
-    # score and HTML-escaped names). Since this is yearly data, the complete
-    # offline snapshot in hospitals_data.py is the reliable source of truth.
-    # To re-enable an experimental live fetch, set ALLOW_LIVE_FETCH = True.
-    ALLOW_LIVE_FETCH = False
-
     if ALLOW_LIVE_FETCH and source == "newsweek":
         live_rows = _try_live_newsweek()
-        # Only accept a live result if it actually carries full columns.
         if live_rows and all(r.get("city") and r.get("state") for r in live_rows):
             rows = _normalize(live_rows, ordinal=True)
             live = True
@@ -153,11 +135,11 @@ def to_csv(rows, meta) -> str:
     buf = io.StringIO()
     writer = csv.writer(buf)
     if meta["ordinal"]:
-        writer.writerow(["Rank", "Hospital", "City", "State", "Score"])
+        writer.writerow(["Rank", "Hospital", "City", "State", "Score", "Website"])
         for r in rows:
-            writer.writerow([r["rank"], r["hospital"], r["city"], r["state"], r["score"]])
+            writer.writerow([r["rank"], r["hospital"], r["city"], r["state"], r["score"], r["website"]])
     else:
-        writer.writerow(["Hospital", "City", "State"])
+        writer.writerow(["Hospital", "City", "State", "Website"])
         for r in rows:
-            writer.writerow([r["hospital"], r["city"], r["state"]])
+            writer.writerow([r["hospital"], r["city"], r["state"], r["website"]])
     return buf.getvalue()
