@@ -1,16 +1,11 @@
 """
 Best Hospitals tool.
 
-Serves the latest U.S. "best hospital" lists from two sources, normalized to:
-
-    {"rank": int|None, "hospital": str, "city": str, "state": str,
-     "score": str, "website": str, "website_display": str}
-
-We serve the curated, versioned snapshot in ``hospitals_data.py`` rather than a
-live scrape: the ranking sites are JavaScript-rendered and bot-protected, so a
-server-side scrape only recovers partial rows. Since this is yearly data, the
-offline snapshot is the reliable source of truth. Set ALLOW_LIVE_FETCH = True
-to experiment with a live fetch (only accepted if it returns full columns).
+Serves the latest U.S. "best hospital" lists from two sources, normalized to a
+common row shape with website + official social handles. We serve the curated,
+versioned snapshot in ``hospitals_data.py`` rather than a live scrape: the
+ranking sites are JavaScript-rendered and bot-protected, so a server-side
+scrape only recovers partial rows. Set ALLOW_LIVE_FETCH = True to experiment.
 """
 from __future__ import annotations
 
@@ -26,6 +21,15 @@ except Exception:  # requests is listed in requirements.txt
 from . import hospitals_data as DATA
 
 ALLOW_LIVE_FETCH = False
+
+# Social platforms shown as columns, in display order.
+SOCIAL_FIELDS = [
+    ("facebook", "Facebook"),
+    ("instagram", "Instagram"),
+    ("twitter", "X / Twitter"),
+    ("youtube", "YouTube"),
+    ("linkedin", "LinkedIn"),
+]
 
 SOURCES = {
     "usnews": {
@@ -52,22 +56,30 @@ HEADERS = {
 }
 
 
+def _clean(url):
+    return (url or "").strip()
+
+
+def _display(url):
+    return url.replace("https://", "").replace("http://", "").rstrip("/")
+
+
 def _normalize(rows, ordinal):
     out = []
     for r in rows:
-        website = (r.get("website") or "").strip()
-        display = website.replace("https://", "").replace("http://", "").rstrip("/")
-        out.append(
-            {
-                "rank": r.get("rank") if ordinal else None,
-                "hospital": (r.get("hospital") or "").strip(),
-                "city": (r.get("city") or "").strip(),
-                "state": (r.get("state") or "").strip(),
-                "score": (r.get("score") or "").strip(),
-                "website": website,
-                "website_display": display,
-            }
-        )
+        website = _clean(r.get("website"))
+        item = {
+            "rank": r.get("rank") if ordinal else None,
+            "hospital": _clean(r.get("hospital")),
+            "city": _clean(r.get("city")),
+            "state": _clean(r.get("state")),
+            "score": _clean(r.get("score")),
+            "website": website,
+            "website_display": _display(website),
+        }
+        for field, _label in SOCIAL_FIELDS:
+            item[field] = _clean(r.get(field))
+        out.append(item)
     return out
 
 
@@ -94,7 +106,7 @@ def _parse_newsweek_html(html):
         rank = int(m.group(1))
         name = re.sub(r"<[^>]+>", "", m.group(2)).strip()
         if name:
-            rows.append({"rank": rank, "hospital": name, "city": "", "state": "", "score": "", "website": ""})
+            rows.append({"rank": rank, "hospital": name})
     return rows
 
 
@@ -127,19 +139,32 @@ def get_hospitals(source: str):
         "live": live,
         "count": len(rows),
         "note": info["note"],
+        "social_fields": SOCIAL_FIELDS,
     }
     return rows, meta
+
+
+def columns(meta):
+    """Header labels + row keys, in order, for the given source."""
+    cols = []
+    if meta["ordinal"]:
+        cols.append(("Rank", "rank"))
+    cols.append(("Hospital", "hospital"))
+    cols.append(("City", "city"))
+    cols.append(("State", "state"))
+    if meta["ordinal"]:
+        cols.append(("Score", "score"))
+    cols.append(("Website", "website"))
+    for field, label in SOCIAL_FIELDS:
+        cols.append((label, field))
+    return cols
 
 
 def to_csv(rows, meta) -> str:
     buf = io.StringIO()
     writer = csv.writer(buf)
-    if meta["ordinal"]:
-        writer.writerow(["Rank", "Hospital", "City", "State", "Score", "Website"])
-        for r in rows:
-            writer.writerow([r["rank"], r["hospital"], r["city"], r["state"], r["score"], r["website"]])
-    else:
-        writer.writerow(["Hospital", "City", "State", "Website"])
-        for r in rows:
-            writer.writerow([r["hospital"], r["city"], r["state"], r["website"]])
+    cols = columns(meta)
+    writer.writerow([label for label, _key in cols])
+    for r in rows:
+        writer.writerow([r.get(key, "") for _label, key in cols])
     return buf.getvalue()
