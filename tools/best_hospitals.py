@@ -115,9 +115,18 @@ def get_hospitals(source: str):
     rows = None
     live = False
 
-    if source == "newsweek":
+    # NOTE: We intentionally serve the curated, versioned snapshot rather than
+    # the live scrape. The ranking sites are JavaScript-rendered, so a server
+    # scrape only recovers partial rows (rank + name, with empty city/state/
+    # score and HTML-escaped names). Since this is yearly data, the complete
+    # offline snapshot in hospitals_data.py is the reliable source of truth.
+    # To re-enable an experimental live fetch, set ALLOW_LIVE_FETCH = True.
+    ALLOW_LIVE_FETCH = False
+
+    if ALLOW_LIVE_FETCH and source == "newsweek":
         live_rows = _try_live_newsweek()
-        if live_rows:
+        # Only accept a live result if it actually carries full columns.
+        if live_rows and all(r.get("city") and r.get("state") for r in live_rows):
             rows = _normalize(live_rows, ordinal=True)
             live = True
 
