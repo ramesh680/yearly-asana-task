@@ -20,7 +20,7 @@
 
   <div class="meta-bar">
     <span class="badge {{ 'live' if meta.live else 'cached' }}">{{ 'Live fetch' if meta.live else 'Cached snapshot' }}</span>
-    <span>{{ meta.count }} hospitals · Edition {{ meta.edition }}</span>
+    <span>{{ meta.count }} hospitals &middot; Edition {{ meta.edition }}</span>
     <a href="{{ meta.url }}" target="_blank" rel="noopener">Source &#8599;</a>
   </div>
   <p class="muted note">{{ meta.note }}</p>
@@ -38,6 +38,7 @@
         <th>City</th>
         <th>State</th>
         {% if meta.ordinal %}<th class="num">Score</th>{% endif %}
+        <th>Website</th>
       </tr>
     </thead>
     <tbody>
@@ -48,6 +49,11 @@
         <td>{{ r.city }}</td>
         <td>{{ r.state }}</td>
         {% if meta.ordinal %}<td class="num">{{ r.score }}</td>{% endif %}
+        <td>
+          {% if r.website %}
+            <a href="{{ r.website }}" target="_blank" rel="noopener">{{ r.website_display }}</a>
+          {% endif %}
+        </td>
       </tr>
       {% endfor %}
     </tbody>
