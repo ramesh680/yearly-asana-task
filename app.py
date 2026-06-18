@@ -24,8 +24,8 @@ TOOLS = [
         "description": (
             "Pulls the latest U.S. best-hospital lists from U.S. News & World "
             "Report (Honor Roll) and Newsweek/Statista (World's Best Hospitals), "
-            "including each hospital's official website. View and download as "
-            "CSV or Excel."
+            "with each hospital's official website and social handles (Facebook, "
+            "Instagram, X, YouTube, LinkedIn). View and download as CSV or Excel."
         ),
         "endpoint": "best_hospitals_view",
         "available": True,
@@ -80,31 +80,31 @@ def _send_xlsx(rows, meta, filename):
     try:
         from openpyxl import Workbook
         from openpyxl.styles import Font
+        from openpyxl.utils import get_column_letter
     except Exception:
         abort(500, "openpyxl is not installed; CSV export is still available.")
+
+    cols = best_hospitals.columns(meta)
 
     wb = Workbook()
     ws = wb.active
     ws.title = "Best Hospitals"
 
-    if meta["ordinal"]:
-        headers = ["Rank", "Hospital", "City", "State", "Score", "Website"]
-    else:
-        headers = ["Hospital", "City", "State", "Website"]
-
-    ws.append(headers)
+    ws.append([label for label, _key in cols])
     for cell in ws[1]:
         cell.font = Font(bold=True)
 
     for r in rows:
-        if meta["ordinal"]:
-            ws.append([r["rank"], r["hospital"], r["city"], r["state"], r["score"], r["website"]])
-        else:
-            ws.append([r["hospital"], r["city"], r["state"], r["website"]])
+        ws.append([r.get(key, "") for _label, key in cols])
 
-    widths = [8, 56, 18, 18, 10, 36] if meta["ordinal"] else [56, 18, 18, 36]
-    for i, w in enumerate(widths, start=1):
-        ws.column_dimensions[chr(64 + i)].width = w
+    # Column widths keyed by header label.
+    width_by_label = {
+        "Rank": 8, "Hospital": 52, "City": 16, "State": 16, "Score": 9,
+        "Website": 30, "Facebook": 42, "Instagram": 38, "X / Twitter": 30,
+        "YouTube": 44, "LinkedIn": 52,
+    }
+    for i, (label, _key) in enumerate(cols, start=1):
+        ws.column_dimensions[get_column_letter(i)].width = width_by_label.get(label, 24)
 
     bio = io.BytesIO()
     wb.save(bio)
