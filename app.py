@@ -1,20 +1,14 @@
 """
-Yearly Asana task — a shared hub of yearly data tools.
+Yearly Asana task - a shared hub of yearly data tools.
 
-This mirrors the structure of the Media Data Tools Hub: a landing page that
-lists tools, and one route per tool. The first tool is "Best Hospitals (US)".
-Add more tools by appending to TOOLS and registering a new route + template.
+The landing page lists tools; each tool has its own route. The kickoff tool is
+"Best Hospitals (US)". Add more tools by appending to TOOLS and registering a
+new route + template.
 """
 import datetime as _dt
 import io
 
-from flask import (
-    Flask,
-    render_template,
-    request,
-    send_file,
-    abort,
-)
+from flask import Flask, render_template, request, send_file, abort
 
 from tools import best_hospitals
 
@@ -22,7 +16,6 @@ app = Flask(__name__)
 
 APP_NAME = "Yearly Asana task"
 
-# Registry that drives the hub landing page. Each new tool gets one entry.
 TOOLS = [
     {
         "key": "best-hospitals",
@@ -30,8 +23,9 @@ TOOLS = [
         "title": "Best Hospitals (US)",
         "description": (
             "Pulls the latest U.S. best-hospital lists from U.S. News & World "
-            "Report (Honor Roll) and Newsweek/Statista (World's Best Hospitals). "
-            "View the list and download it as CSV or Excel."
+            "Report (Honor Roll) and Newsweek/Statista (World's Best Hospitals), "
+            "including each hospital's official website. View and download as "
+            "CSV or Excel."
         ),
         "endpoint": "best_hospitals_view",
         "available": True,
@@ -68,17 +62,17 @@ def best_hospitals_export():
     rows, meta = best_hospitals.get_hospitals(source)
 
     stamp = _dt.date.today().isoformat()
-    base = f"best_hospitals_{meta['source']}_{meta['edition']}_{stamp}"
+    base = "best_hospitals_{}_{}_{}".format(meta["source"], meta["edition"], stamp)
 
     if fmt == "xlsx":
-        return _send_xlsx(rows, meta, f"{base}.xlsx")
+        return _send_xlsx(rows, meta, base + ".xlsx")
 
     csv_text = best_hospitals.to_csv(rows, meta)
     return send_file(
         io.BytesIO(csv_text.encode("utf-8")),
         mimetype="text/csv",
         as_attachment=True,
-        download_name=f"{base}.csv",
+        download_name=base + ".csv",
     )
 
 
@@ -94,22 +88,21 @@ def _send_xlsx(rows, meta, filename):
     ws.title = "Best Hospitals"
 
     if meta["ordinal"]:
-        headers = ["Rank", "Hospital", "City", "State", "Score"]
+        headers = ["Rank", "Hospital", "City", "State", "Score", "Website"]
     else:
-        headers = ["Hospital", "City", "State"]
+        headers = ["Hospital", "City", "State", "Website"]
 
     ws.append(headers)
-    for c in ws[1]:
-        c.font = Font(bold=True)
+    for cell in ws[1]:
+        cell.font = Font(bold=True)
 
     for r in rows:
         if meta["ordinal"]:
-            ws.append([r["rank"], r["hospital"], r["city"], r["state"], r["score"]])
+            ws.append([r["rank"], r["hospital"], r["city"], r["state"], r["score"], r["website"]])
         else:
-            ws.append([r["hospital"], r["city"], r["state"]])
+            ws.append([r["hospital"], r["city"], r["state"], r["website"]])
 
-    # Reasonable column widths
-    widths = [8, 56, 18, 18, 10] if meta["ordinal"] else [56, 18, 18]
+    widths = [8, 56, 18, 18, 10, 36] if meta["ordinal"] else [56, 18, 18, 36]
     for i, w in enumerate(widths, start=1):
         ws.column_dimensions[chr(64 + i)].width = w
 
