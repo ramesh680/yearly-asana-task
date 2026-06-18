@@ -109,3 +109,12 @@ table.data tbody tr:hover { background: #f9fbff; }
 .foot p { color: var(--muted); font-size: 13px; border-top: 1px solid var(--line); padding-top: 16px; }
 
 code { background: #eef1f6; padding: 1px 5px; border-radius: 4px; font-size: 13px; }
+
+/* Wide table with social columns */
+.table-scroll { overflow-x: auto; }
+table.data .social { text-align: center; white-space: nowrap; }
+table.data .social a {
+  color: var(--brand); text-decoration: none; font-weight: 600; font-size: 13px;
+}
+table.data .social a:hover { text-decoration: underline; }
+.dash { color: #c2c9d4; }
