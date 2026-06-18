@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Best Hospitals (US) · {{ app_name }}{% endblock %}
+{% block content %}
+  <p class="crumbs"><a href="{{ url_for('index') }}">&larr; All tools</a></p>
+
+  <section class="hero">
+    <h1>Best Hospitals (US)</h1>
+    <p class="lede">The latest U.S. best-hospital lists from two sources. Switch sources, then download as CSV or Excel.</p>
+  </section>
+
+  <form class="controls" method="get" action="{{ url_for('best_hospitals_view') }}">
+    <label for="source">Source</label>
+    <select id="source" name="source" onchange="this.form.submit()">
+      {% for key, info in sources.items() %}
+        <option value="{{ key }}" {% if key == meta.source %}selected{% endif %}>{{ info.label }} ({{ info.edition }})</option>
+      {% endfor %}
+    </select>
+    <noscript><button class="btn" type="submit">Go</button></noscript>
+  </form>
+
+  <div class="meta-bar">
+    <span class="badge {{ 'live' if meta.live else 'cached' }}">{{ 'Live fetch' if meta.live else 'Cached snapshot' }}</span>
+    <span>{{ meta.count }} hospitals · Edition {{ meta.edition }}</span>
+    <a href="{{ meta.url }}" target="_blank" rel="noopener">Source &#8599;</a>
+  </div>
+  <p class="muted note">{{ meta.note }}</p>
+
+  <div class="exports">
+    <a class="btn" href="{{ url_for('best_hospitals_export', source=meta.source, fmt='csv') }}">Download CSV</a>
+    <a class="btn ghost" href="{{ url_for('best_hospitals_export', source=meta.source, fmt='xlsx') }}">Download Excel</a>
+  </div>
+
+  <table class="data">
+    <thead>
+      <tr>
+        {% if meta.ordinal %}<th class="num">Rank</th>{% endif %}
+        <th>Hospital</th>
+        <th>City</th>
+        <th>State</th>
+        {% if meta.ordinal %}<th class="num">Score</th>{% endif %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}
+      <tr>
+        {% if meta.ordinal %}<td class="num">{{ r.rank }}</td>{% endif %}
+        <td>{{ r.hospital }}</td>
+        <td>{{ r.city }}</td>
+        <td>{{ r.state }}</td>
+        {% if meta.ordinal %}<td class="num">{{ r.score }}</td>{% endif %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
