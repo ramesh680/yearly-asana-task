@@ -5,7 +5,7 @@
 
   <section class="hero">
     <h1>Best Hospitals (US)</h1>
-    <p class="lede">The latest U.S. best-hospital lists from two sources. Switch sources, then download as CSV or Excel.</p>
+    <p class="lede">The latest U.S. best-hospital lists, with official website and social accounts. Switch sources, then download as CSV or Excel.</p>
   </section>
 
   <form class="controls" method="get" action="{{ url_for('best_hospitals_view') }}">
@@ -23,13 +23,14 @@
     <span>{{ meta.count }} hospitals &middot; Edition {{ meta.edition }}</span>
     <a href="{{ meta.url }}" target="_blank" rel="noopener">Source &#8599;</a>
   </div>
-  <p class="muted note">{{ meta.note }}</p>
+  <p class="muted note">{{ meta.note }} Social accounts are official system-level handles; blank where not verifiable.</p>
 
   <div class="exports">
     <a class="btn" href="{{ url_for('best_hospitals_export', source=meta.source, fmt='csv') }}">Download CSV</a>
     <a class="btn ghost" href="{{ url_for('best_hospitals_export', source=meta.source, fmt='xlsx') }}">Download Excel</a>
   </div>
 
+  <div class="table-scroll">
   <table class="data">
     <thead>
       <tr>
@@ -39,6 +40,7 @@
         <th>State</th>
         {% if meta.ordinal %}<th class="num">Score</th>{% endif %}
         <th>Website</th>
+        {% for field, label in meta.social_fields %}<th>{{ label }}</th>{% endfor %}
       </tr>
     </thead>
     <tbody>
@@ -50,12 +52,16 @@
         <td>{{ r.state }}</td>
         {% if meta.ordinal %}<td class="num">{{ r.score }}</td>{% endif %}
         <td>
-          {% if r.website %}
-            <a href="{{ r.website }}" target="_blank" rel="noopener">{{ r.website_display }}</a>
-          {% endif %}
+          {% if r.website %}<a href="{{ r.website }}" target="_blank" rel="noopener">{{ r.website_display }}</a>{% endif %}
         </td>
+        {% for field, label in meta.social_fields %}
+        <td class="social">
+          {% if r[field] %}<a href="{{ r[field] }}" target="_blank" rel="noopener" title="{{ label }}">Link</a>{% else %}<span class="dash">&mdash;</span>{% endif %}
+        </td>
+        {% endfor %}
       </tr>
       {% endfor %}
     </tbody>
   </table>
+  </div>
 {% endblock %}
