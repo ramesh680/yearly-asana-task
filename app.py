@@ -34,7 +34,7 @@ TOOLS = [
         "category": "Education",
         "title": "Best Colleges (US)",
         "description": (
-            "U.S. News Best National Universities (Top 50, 2026), with each "
+            "U.S. News Best National Universities (Top 100, 2026), with each "
             "school's official website and social handles (Facebook, Instagram, "
             "X, YouTube, LinkedIn). View and download as CSV or Excel."
         ),
