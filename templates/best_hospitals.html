@@ -5,7 +5,7 @@
 
   <section class="hero">
     <h1>Best Hospitals (US)</h1>
-    <p class="lede">The latest U.S. best-hospital lists, with official website and social accounts. Switch sources, then download as CSV or Excel.</p>
+    <p class="lede">The latest U.S. best-hospital lists, with official website, social accounts, and Wikipedia page. Switch sources, then download as CSV or Excel.</p>
   </section>
 
   <form class="controls" method="get" action="{{ url_for('best_hospitals_view') }}">
@@ -22,7 +22,9 @@
     <span class="badge {{ 'live' if meta.live else 'cached' }}">{{ 'Live fetch' if meta.live else 'Cached snapshot' }}</span>
     <span>{{ meta.count }} hospitals &middot; Edition {{ meta.edition }}</span>
     <a href="{{ meta.url }}" target="_blank" rel="noopener">Source &#8599;</a>
+    {% if not meta.live %}<a href="{{ url_for('best_hospitals_view', source=meta.source, live=1) }}">Try live refresh &#8635;</a>{% endif %}
   </div>
+  {% if meta.live_attempted and not meta.live %}<p class="muted note">Live refresh attempted, but the source couldn't be fetched (it's JavaScript-rendered / protected) — showing the cached snapshot.</p>{% endif %}
   <p class="muted note">{{ meta.note }} Social accounts are official system-level handles; blank where not verifiable.</p>
 
   <div class="exports">
@@ -41,6 +43,7 @@
         {% if meta.ordinal %}<th class="num">Score</th>{% endif %}
         <th>Website</th>
         {% for field, label in meta.social_fields %}<th>{{ label }}</th>{% endfor %}
+        <th>Wikipedia</th>
       </tr>
     </thead>
     <tbody>
@@ -51,14 +54,11 @@
         <td>{{ r.city }}</td>
         <td>{{ r.state }}</td>
         {% if meta.ordinal %}<td class="num">{{ r.score }}</td>{% endif %}
-        <td>
-          {% if r.website %}<a href="{{ r.website }}" target="_blank" rel="noopener">{{ r.website_display }}</a>{% endif %}
-        </td>
+        <td>{% if r.website %}<a href="{{ r.website }}" target="_blank" rel="noopener">{{ r.website_display }}</a>{% endif %}</td>
         {% for field, label in meta.social_fields %}
-        <td class="social">
-          {% if r[field] %}<a href="{{ r[field] }}" target="_blank" rel="noopener" title="{{ label }}">Link</a>{% else %}<span class="dash">&mdash;</span>{% endif %}
-        </td>
+        <td class="social">{% if r[field] %}<a href="{{ r[field] }}" target="_blank" rel="noopener" title="{{ label }}">Link</a>{% else %}<span class="dash">&mdash;</span>{% endif %}</td>
         {% endfor %}
+        <td class="social">{% if r.wikipedia %}<a href="{{ r.wikipedia }}" target="_blank" rel="noopener" title="Wikipedia">Wiki</a>{% else %}<span class="dash">&mdash;</span>{% endif %}</td>
       </tr>
       {% endfor %}
     </tbody>
