@@ -5,14 +5,16 @@
 
   <section class="hero">
     <h1>Best Colleges (US)</h1>
-    <p class="lede">U.S. News Best National Universities, with official website and social accounts. Download as CSV or Excel.</p>
+    <p class="lede">U.S. News Best National Universities, with official website, social accounts, and Wikipedia page. Download as CSV or Excel.</p>
   </section>
 
   <div class="meta-bar">
-    <span class="badge cached">Cached snapshot</span>
+    <span class="badge {{ 'live' if meta.live else 'cached' }}">{{ 'Live fetch' if meta.live else 'Cached snapshot' }}</span>
     <span>Top {{ meta.count }} &middot; Edition {{ meta.edition }}</span>
     <a href="{{ meta.url }}" target="_blank" rel="noopener">Source &#8599;</a>
+    {% if not meta.live %}<a href="{{ url_for('best_colleges_view', live=1) }}">Try live refresh &#8635;</a>{% endif %}
   </div>
+  {% if meta.live_attempted and not meta.live %}<p class="muted note">Live refresh attempted, but U.S. News couldn't be fetched (JavaScript-rendered and login-gated) — showing the cached snapshot.</p>{% endif %}
   <p class="muted note">{{ meta.note }} Social accounts are official institutional handles; blank where not verifiable.</p>
 
   <div class="exports">
@@ -30,6 +32,7 @@
         <th>State</th>
         <th>Website</th>
         {% for field, label in meta.social_fields %}<th>{{ label }}</th>{% endfor %}
+        <th>Wikipedia</th>
       </tr>
     </thead>
     <tbody>
@@ -39,14 +42,11 @@
         <td>{{ r.university }}</td>
         <td>{{ r.city }}</td>
         <td>{{ r.state }}</td>
-        <td>
-          {% if r.website %}<a href="{{ r.website }}" target="_blank" rel="noopener">{{ r.website_display }}</a>{% endif %}
-        </td>
+        <td>{% if r.website %}<a href="{{ r.website }}" target="_blank" rel="noopener">{{ r.website_display }}</a>{% endif %}</td>
         {% for field, label in meta.social_fields %}
-        <td class="social">
-          {% if r[field] %}<a href="{{ r[field] }}" target="_blank" rel="noopener" title="{{ label }}">Link</a>{% else %}<span class="dash">&mdash;</span>{% endif %}
-        </td>
+        <td class="social">{% if r[field] %}<a href="{{ r[field] }}" target="_blank" rel="noopener" title="{{ label }}">Link</a>{% else %}<span class="dash">&mdash;</span>{% endif %}</td>
         {% endfor %}
+        <td class="social">{% if r.wikipedia %}<a href="{{ r.wikipedia }}" target="_blank" rel="noopener" title="Wikipedia">Wiki</a>{% else %}<span class="dash">&mdash;</span>{% endif %}</td>
       </tr>
       {% endfor %}
     </tbody>
