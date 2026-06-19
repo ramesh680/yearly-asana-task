@@ -79,6 +79,7 @@ def _normalize(rows, ordinal):
         }
         for field, _label in SOCIAL_FIELDS:
             item[field] = _clean(r.get(field))
+        item["wikipedia"] = _clean(r.get("wikipedia"))
         out.append(item)
     return out
 
@@ -110,7 +111,7 @@ def _parse_newsweek_html(html):
     return rows
 
 
-def get_hospitals(source: str):
+def get_hospitals(source: str, live: bool = False):
     if source not in SOURCES:
         source = "newsweek"
     info = SOURCES[source]
@@ -118,7 +119,7 @@ def get_hospitals(source: str):
     rows = None
     live = False
 
-    if ALLOW_LIVE_FETCH and source == "newsweek":
+    if (ALLOW_LIVE_FETCH or live) and source == "newsweek":
         live_rows = _try_live_newsweek()
         if live_rows and all(r.get("city") and r.get("state") for r in live_rows):
             rows = _normalize(live_rows, ordinal=True)
@@ -140,6 +141,7 @@ def get_hospitals(source: str):
         "count": len(rows),
         "note": info["note"],
         "social_fields": SOCIAL_FIELDS,
+        "live_attempted": bool(live),
     }
     return rows, meta
 
@@ -157,6 +159,7 @@ def columns(meta):
     cols.append(("Website", "website"))
     for field, label in SOCIAL_FIELDS:
         cols.append((label, field))
+    cols.append(("Wikipedia", "wikipedia"))
     return cols
 
 
