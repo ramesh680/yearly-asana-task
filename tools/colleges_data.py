@@ -1,11 +1,12 @@
 """
-Baked-in Best Colleges reference data: U.S. News 2026 Best National Universities
-(Top 50), with official website and social handles.
+Baked-in Best Colleges reference data: U.S. News 2026 Best National
+Universities (Top 100), with official website and social handles.
 
-Versioned yearly snapshot served by the app. The U.S. News rankings page is
-JavaScript-rendered and gates the full list behind a login, so ranks are stored
-here and refreshed each year. Ranks reflect ties as published (shared numbers).
-Social handles are official main institutional accounts; blank where not verifiable.
+Versioned yearly snapshot served by the app. The U.S. News page is
+JavaScript-rendered and gates the full list behind a login, so ranks are
+stored here and refreshed yearly. Ranks reflect ties as published (shared
+numbers). Social handles are official main institutional accounts; blank
+where not verifiable (social verification for ranks 51-100 is pending).
 
 Source: https://www.usnews.com/best-colleges/rankings/national-universities
 """
@@ -64,4 +65,54 @@ NATIONAL_UNIVERSITIES = [
     {"rank": 46, "university": "Purdue University-West Lafayette", "city": "West Lafayette", "state": "Indiana", "website": "https://www.purdue.edu/", "facebook": "https://www.facebook.com/purdue", "instagram": "https://www.instagram.com/lifeatpurdue", "twitter": "https://x.com/LifeAtPurdue", "youtube": "https://www.youtube.com/purdue", "linkedin": "https://www.linkedin.com/school/purdue-university"},
     {"rank": 46, "university": "University of Georgia", "city": "Athens", "state": "Georgia", "website": "https://www.uga.edu/", "facebook": "https://www.facebook.com/universityofga", "instagram": "https://www.instagram.com/universityofga", "twitter": "https://x.com/universityofga", "youtube": "https://www.youtube.com/universityofga", "linkedin": "https://www.linkedin.com/school/university-of-georgia"},
     {"rank": 46, "university": "University of Rochester", "city": "Rochester", "state": "New York", "website": "https://www.rochester.edu/", "facebook": "https://www.facebook.com/UniversityofRochester", "instagram": "https://www.instagram.com/urochester", "twitter": "https://x.com/UofR", "youtube": "https://www.youtube.com/universityofrochester", "linkedin": "https://www.linkedin.com/school/university-of-rochester"},
+    {"rank": 51, "university": "Case Western Reserve University", "city": "Cleveland", "state": "Ohio", "website": "https://www.case.edu/", "facebook": "", "instagram": "", "twitter": "", "youtube": "", "linkedin": ""},
+    {"rank": 51, "university": "Florida State University", "city": "Tallahassee", "state": "Florida", "website": "https://www.fsu.edu/", "facebook": "", "instagram": "", "twitter": "", "youtube": "", "linkedin": ""},
+    {"rank": 51, "university": "Texas A&M University", "city": "College Station", "state": "Texas", "website": "https://www.tamu.edu/", "facebook": "", "instagram": "", "twitter": "", "youtube": "", "linkedin": ""},
+    {"rank": 51, "university": "Virginia Tech", "city": "Blacksburg", "state": "Virginia", "website": "https://www.vt.edu/", "facebook": "", "instagram": "", "twitter": "", "youtube": "", "linkedin": ""},
+    {"rank": 51, "university": "Wake Forest University", "city": "Winston-Salem", "state": "North Carolina", "website": "https://www.wfu.edu/", "facebook": "", "instagram": "", "twitter": "", "youtube": "", "linkedin": ""},
+    {"rank": 51, "university": "William & Mary", "city": "Williamsburg", "state": "Virginia", "website": "https://www.wm.edu/", "facebook": "", "instagram": "", "twitter": "", "youtube": "", "linkedin": ""},
+    {"rank": 57, "university": "University of California, Merced", "city": "Merced", "state": "California", "website": "https://www.ucmerced.edu/", "facebook": "", "instagram": "", "twitter": "", "youtube": "", "linkedin": ""},
+    {"rank": 57, "university": "Villanova University", "city": "Villanova", "state": "Pennsylvania", "website": "https://www.villanova.edu/", "facebook": "", "instagram": "", "twitter": "", "youtube": "", "linkedin": ""},
+    {"rank": 59, "university": "George Washington University", "city": "Washington", "state": "District of Columbia", "website": "https://www.gwu.edu/", "facebook": "", "instagram": "", "twitter": "", "youtube": "", "linkedin": ""},
+    {"rank": 59, "university": "The Pennsylvania State University--University Park", "city": "University Park", "state": "Pennsylvania", "website": "https://www.psu.edu/", "facebook": "", "instagram": "", "twitter": "", "youtube": "", "linkedin": ""},
+    {"rank": 59, "university": "Santa Clara University", "city": "Santa Clara", "state": "California", "website": "https://www.scu.edu/", "facebook": "", "instagram": "", "twitter": "", "youtube": "", "linkedin": ""},
+    {"rank": 59, "university": "Stony Brook University--SUNY", "city": "Stony Brook", "state": "New York", "website": "https://www.stonybrook.edu/", "facebook": "", "instagram": "", "twitter": "", "youtube": "", "linkedin": ""},
+    {"rank": 59, "university": "University of Minnesota--Twin Cities", "city": "Minneapolis", "state": "Minnesota", "website": "https://twin-cities.umn.edu/", "facebook": "", "instagram": "", "twitter": "", "youtube": "", "linkedin": ""},
+    {"rank": 64, "university": "Michigan State University", "city": "East Lansing", "state": "Michigan", "website": "https://www.msu.edu/", "facebook": "", "instagram": "", "twitter": "", "youtube": "", "linkedin": ""},
+    {"rank": 64, "university": "North Carolina State University", "city": "Raleigh", "state": "North Carolina", "website": "https://www.ncsu.edu/", "facebook": "", "instagram": "", "twitter": "", "youtube": "", "linkedin": ""},
+    {"rank": 64, "university": "Rensselaer Polytechnic Institute", "city": "Troy", "state": "New York", "website": "https://www.rpi.edu/", "facebook": "", "instagram": "", "twitter": "", "youtube": "", "linkedin": ""},
+    {"rank": 64, "university": "University of Massachusetts--Amherst", "city": "Amherst", "state": "Massachusetts", "website": "https://www.umass.edu/", "facebook": "", "instagram": "", "twitter": "", "youtube": "", "linkedin": ""},
+    {"rank": 64, "university": "University of Miami", "city": "Coral Gables", "state": "Florida", "website": "https://welcome.miami.edu/", "facebook": "", "instagram": "", "twitter": "", "youtube": "", "linkedin": ""},
+    {"rank": 69, "university": "Brandeis University", "city": "Waltham", "state": "Massachusetts", "website": "https://www.brandeis.edu/", "facebook": "", "instagram": "", "twitter": "", "youtube": "", "linkedin": ""},
+    {"rank": 69, "university": "Tulane University of Louisiana", "city": "New Orleans", "state": "Louisiana", "website": "https://www.tulane.edu/", "facebook": "", "instagram": "", "twitter": "", "youtube": "", "linkedin": ""},
+    {"rank": 69, "university": "University of Connecticut", "city": "Storrs", "state": "Connecticut", "website": "https://www.uconn.edu/", "facebook": "", "instagram": "", "twitter": "", "youtube": "", "linkedin": ""},
+    {"rank": 69, "university": "University of Pittsburgh", "city": "Pittsburgh", "state": "Pennsylvania", "website": "https://www.pitt.edu/", "facebook": "", "instagram": "", "twitter": "", "youtube": "", "linkedin": ""},
+    {"rank": 73, "university": "Binghamton University--SUNY", "city": "Binghamton", "state": "New York", "website": "https://www.binghamton.edu/", "facebook": "", "instagram": "", "twitter": "", "youtube": "", "linkedin": ""},
+    {"rank": 73, "university": "Indiana University--Bloomington", "city": "Bloomington", "state": "Indiana", "website": "https://www.indiana.edu/", "facebook": "", "instagram": "", "twitter": "", "youtube": "", "linkedin": ""},
+    {"rank": 75, "university": "Clemson University", "city": "Clemson", "state": "South Carolina", "website": "https://www.clemson.edu/", "facebook": "", "instagram": "", "twitter": "", "youtube": "", "linkedin": ""},
+    {"rank": 75, "university": "Rutgers University--Newark", "city": "Newark", "state": "New Jersey", "website": "https://www.newark.rutgers.edu/", "facebook": "", "instagram": "", "twitter": "", "youtube": "", "linkedin": ""},
+    {"rank": 75, "university": "Syracuse University", "city": "Syracuse", "state": "New York", "website": "https://www.syracuse.edu/", "facebook": "", "instagram": "", "twitter": "", "youtube": "", "linkedin": ""},
+    {"rank": 75, "university": "University at Buffalo--SUNY", "city": "Buffalo", "state": "New York", "website": "https://www.buffalo.edu/", "facebook": "", "instagram": "", "twitter": "", "youtube": "", "linkedin": ""},
+    {"rank": 75, "university": "University of California, Riverside", "city": "Riverside", "state": "California", "website": "https://www.ucr.edu/", "facebook": "", "instagram": "", "twitter": "", "youtube": "", "linkedin": ""},
+    {"rank": 80, "university": "Colorado School of Mines", "city": "Golden", "state": "Colorado", "website": "https://www.mines.edu/", "facebook": "", "instagram": "", "twitter": "", "youtube": "", "linkedin": ""},
+    {"rank": 80, "university": "Drexel University", "city": "Philadelphia", "state": "Pennsylvania", "website": "https://drexel.edu/", "facebook": "", "instagram": "", "twitter": "", "youtube": "", "linkedin": ""},
+    {"rank": 80, "university": "New Jersey Institute of Technology", "city": "Newark", "state": "New Jersey", "website": "https://www.njit.edu/", "facebook": "", "instagram": "", "twitter": "", "youtube": "", "linkedin": ""},
+    {"rank": 80, "university": "Stevens Institute of Technology", "city": "Hoboken", "state": "New Jersey", "website": "https://www.stevens.edu/", "facebook": "", "instagram": "", "twitter": "", "youtube": "", "linkedin": ""},
+    {"rank": 84, "university": "Pepperdine University", "city": "Malibu", "state": "California", "website": "https://www.pepperdine.edu/", "facebook": "", "instagram": "", "twitter": "", "youtube": "", "linkedin": ""},
+    {"rank": 84, "university": "University of Illinois Chicago", "city": "Chicago", "state": "Illinois", "website": "https://www.uic.edu/", "facebook": "", "instagram": "", "twitter": "", "youtube": "", "linkedin": ""},
+    {"rank": 84, "university": "Worcester Polytechnic Institute", "city": "Worcester", "state": "Massachusetts", "website": "https://www.wpi.edu/", "facebook": "", "instagram": "", "twitter": "", "youtube": "", "linkedin": ""},
+    {"rank": 84, "university": "Yeshiva University", "city": "New York", "state": "New York", "website": "https://www.yu.edu/", "facebook": "", "instagram": "", "twitter": "", "youtube": "", "linkedin": ""},
+    {"rank": 88, "university": "American University", "city": "Washington", "state": "District of Columbia", "website": "https://www.american.edu/", "facebook": "", "instagram": "", "twitter": "", "youtube": "", "linkedin": ""},
+    {"rank": 88, "university": "Baylor University", "city": "Waco", "state": "Texas", "website": "https://www.baylor.edu/", "facebook": "", "instagram": "", "twitter": "", "youtube": "", "linkedin": ""},
+    {"rank": 88, "university": "Howard University", "city": "Washington", "state": "District of Columbia", "website": "https://howard.edu/", "facebook": "", "instagram": "", "twitter": "", "youtube": "", "linkedin": ""},
+    {"rank": 88, "university": "Marquette University", "city": "Milwaukee", "state": "Wisconsin", "website": "https://www.marquette.edu/", "facebook": "", "instagram": "", "twitter": "", "youtube": "", "linkedin": ""},
+    {"rank": 88, "university": "Rochester Institute of Technology", "city": "Rochester", "state": "New York", "website": "https://www.rit.edu/", "facebook": "", "instagram": "", "twitter": "", "youtube": "", "linkedin": ""},
+    {"rank": 88, "university": "Southern Methodist University", "city": "Dallas", "state": "Texas", "website": "https://www.smu.edu/", "facebook": "", "instagram": "", "twitter": "", "youtube": "", "linkedin": ""},
+    {"rank": 88, "university": "University of California, Santa Cruz", "city": "Santa Cruz", "state": "California", "website": "https://www.ucsc.edu/", "facebook": "", "instagram": "", "twitter": "", "youtube": "", "linkedin": ""},
+    {"rank": 88, "university": "University of Delaware", "city": "Newark", "state": "Delaware", "website": "https://www.udel.edu/", "facebook": "", "instagram": "", "twitter": "", "youtube": "", "linkedin": ""},
+    {"rank": 88, "university": "University of South Florida", "city": "Tampa", "state": "Florida", "website": "https://www.usf.edu/", "facebook": "", "instagram": "", "twitter": "", "youtube": "", "linkedin": ""},
+    {"rank": 97, "university": "Florida International University", "city": "Miami", "state": "Florida", "website": "https://www.fiu.edu/", "facebook": "", "instagram": "", "twitter": "", "youtube": "", "linkedin": ""},
+    {"rank": 97, "university": "Fordham University", "city": "New York", "state": "New York", "website": "https://www.fordham.edu/", "facebook": "", "instagram": "", "twitter": "", "youtube": "", "linkedin": ""},
+    {"rank": 97, "university": "Rutgers University--Camden", "city": "Camden", "state": "New Jersey", "website": "https://www.camden.rutgers.edu/", "facebook": "", "instagram": "", "twitter": "", "youtube": "", "linkedin": ""},
+    {"rank": 97, "university": "Texas Christian University", "city": "Fort Worth", "state": "Texas", "website": "https://www.tcu.edu/", "facebook": "", "instagram": "", "twitter": "", "youtube": "", "linkedin": ""},
 ]
