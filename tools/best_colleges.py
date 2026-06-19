@@ -12,6 +12,11 @@ from __future__ import annotations
 import csv
 import io
 
+try:
+    import requests
+except Exception:
+    requests = None
+
 from . import colleges_data as DATA
 
 SOCIAL_FIELDS = [
@@ -38,7 +43,31 @@ def _display(url):
     return url.replace("https://", "").replace("http://", "").rstrip("/")
 
 
-def get_colleges():
+_HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"}
+
+
+def _try_live():
+    """Best-effort live fetch from U.S. News. The page is JavaScript-rendered
+    and gates the full list behind a login, so a server-side fetch returns no
+    usable ranking rows -> we return None and fall back to the cached snapshot."""
+    if requests is None:
+        return None
+    try:
+        resp = requests.get(DATA.COLLEGES_SOURCE_URL, headers=_HEADERS, timeout=12)
+        if resp.status_code != 200:
+            return None
+        # The ranking rows are not present in the static HTML; nothing reliable
+        # to parse. Returning None keeps the trustworthy cached snapshot.
+        return None
+    except Exception:
+        return None
+
+
+def get_colleges(live: bool = False):
+    is_live = False
+    if live:
+        live_rows = _try_live()
+        is_live = bool(live_rows)
     rows = []
     for r in DATA.NATIONAL_UNIVERSITIES:
         website = _clean(r.get("website"))
@@ -52,6 +81,7 @@ def get_colleges():
         }
         for field, _label in SOCIAL_FIELDS:
             item[field] = _clean(r.get(field))
+        item["wikipedia"] = _clean(r.get("wikipedia"))
         rows.append(item)
 
     meta = {
@@ -61,6 +91,8 @@ def get_colleges():
         "note": INFO["note"],
         "count": len(rows),
         "social_fields": SOCIAL_FIELDS,
+        "live": is_live,
+        "live_attempted": bool(live),
     }
     return rows, meta
 
@@ -70,6 +102,7 @@ def columns():
             ("State", "state"), ("Website", "website")]
     for field, label in SOCIAL_FIELDS:
         cols.append((label, field))
+    cols.append(("Wikipedia", "wikipedia"))
     return cols
 
 
