@@ -58,7 +58,8 @@ def index():
 @app.route("/best-hospitals")
 def best_hospitals_view():
     source = request.args.get("source", "newsweek")
-    rows, meta = best_hospitals.get_hospitals(source)
+    live = request.args.get("live") in ("1", "true", "yes")
+    rows, meta = best_hospitals.get_hospitals(source, live=live)
     return render_template(
         "best_hospitals.html", rows=rows, meta=meta, sources=best_hospitals.SOURCES,
     )
@@ -79,7 +80,8 @@ def best_hospitals_export():
 # ---------------------------------------------------------------- Colleges
 @app.route("/best-colleges")
 def best_colleges_view():
-    rows, meta = best_colleges.get_colleges()
+    live = request.args.get("live") in ("1", "true", "yes")
+    rows, meta = best_colleges.get_colleges(live=live)
     return render_template("best_colleges.html", rows=rows, meta=meta)
 
 
@@ -125,7 +127,7 @@ def _send_xlsx(cols, rows, sheet_title, filename):
     width_by_label = {
         "Rank": 8, "Hospital": 52, "University": 44, "City": 16, "State": 18,
         "Score": 9, "Website": 30, "Facebook": 42, "Instagram": 38,
-        "X / Twitter": 30, "YouTube": 44, "LinkedIn": 52,
+        "X / Twitter": 30, "YouTube": 44, "LinkedIn": 52, "Wikipedia": 30,
     }
     for i, (label, _key) in enumerate(cols, start=1):
         ws.column_dimensions[get_column_letter(i)].width = width_by_label.get(label, 24)
