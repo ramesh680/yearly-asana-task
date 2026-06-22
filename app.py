@@ -41,6 +41,19 @@ TOOLS = [
         "endpoint": "best_colleges_view",
         "available": True,
     },
+    {
+        "key": "russell-3000",
+        "category": "Finance",
+        "title": "Russell 3000",
+        "description": (
+            "All Russell 3000 constituents (via iShares IWV holdings), ranked "
+            "by index weight, with each company's official website, Wikipedia "
+            "page, and social handles (Facebook, Instagram, X, YouTube, "
+            "LinkedIn). View and download as CSV or Excel."
+        ),
+        "endpoint": "russell_3000_view",
+        "available": True,
+    },
 ]
 
 
