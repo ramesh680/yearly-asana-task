@@ -108,6 +108,13 @@ def best_colleges_export():
         return _send_xlsx(best_colleges.columns(), rows, "Best Colleges", base + ".xlsx")
     return _send_csv(best_colleges.to_csv(rows), base + ".csv")
 
+# ---------------------------------------------------------------- Russell 3000
+@app.route("/russell-3000")
+def russell_3000_view():
+    import os
+    path = os.path.join(app.root_path, "templates", "russell-3000.html")
+    with open(path, encoding="utf-8") as f:
+        return f.read()
 
 # ---------------------------------------------------------------- Helpers
 def _send_csv(csv_text, filename):
