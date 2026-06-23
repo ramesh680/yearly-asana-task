@@ -9,7 +9,7 @@ import io
 
 from flask import Flask, render_template, request, send_file, abort
 
-from tools import best_hospitals, best_colleges, premier_league, saudi_pro_league, twitch_streamers
+from tools import best_hospitals, best_colleges, premier_league, saudi_pro_league, twitch_streamers, wnba_teams
 
 app = Flask(__name__)
 
@@ -94,6 +94,20 @@ TOOLS = [
             "and download as CSV or Excel."
         ),
         "endpoint": "twitch_streamers_view",
+        "available": True,
+    },
+    {
+        "key": "wnba-teams",
+        "category": "Basketball",
+        "title": "WNBA Teams",
+        "description": (
+            "The 13 Women's National Basketball Association teams (2025 season, "
+            "via wnba.com), ordered by final regular-season standing, with each "
+            "team's home city, arena, win-loss record, official website and "
+            "social handles (X, Instagram, Facebook) plus Wikipedia. View and "
+            "download as CSV or Excel."
+        ),
+        "endpoint": "wnba_teams_view",
         "available": True,
     },
 ]
@@ -215,6 +229,25 @@ def twitch_streamers_export():
     return _send_csv(twitch_streamers.to_csv(rows), base + ".csv")
 
 
+# ---------------------------------------------------------------- WNBA Teams
+@app.route("/wnba-teams")
+def wnba_teams_view():
+    live = request.args.get("live") in ("1", "true", "yes")
+    rows, meta = wnba_teams.get_teams(live=live)
+    return render_template("wnba-teams.html", rows=rows, meta=meta)
+
+
+@app.route("/wnba-teams/export")
+def wnba_teams_export():
+    fmt = request.args.get("fmt", "csv")
+    rows, meta = wnba_teams.get_teams()
+    stamp = _dt.date.today().isoformat()
+    base = "wnba_teams_{}_{}".format(meta["edition"].replace(" ", "_"), stamp)
+    if fmt == "xlsx":
+        return _send_xlsx(wnba_teams.columns(), rows, "WNBA Teams", base + ".xlsx")
+    return _send_csv(wnba_teams.to_csv(rows), base + ".csv")
+
+
 # ---------------------------------------------------------------- Helpers
 def _send_csv(csv_text, filename):
     return send_file(
@@ -250,6 +283,7 @@ def _send_xlsx(cols, rows, sheet_title, filename):
         "Position": 9, "Club": 30, "Stadium": 28, "Points": 9,
         "Channel": 26, "Avg Viewers": 14, "Peak Viewers": 14,
         "Hours Watched": 16, "Twitch": 28,
+        "Seed": 7, "Team": 26, "Arena": 26, "W": 6, "L": 6,
     }
     for i, (label, _key) in enumerate(cols, start=1):
         ws.column_dimensions[get_column_letter(i)].width = width_by_label.get(label, 24)
