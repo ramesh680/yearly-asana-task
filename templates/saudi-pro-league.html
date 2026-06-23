@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Saudi Pro League · {{ app_name }}{% endblock %}
+{% block content %}
+  <p class="crumbs"><a href="{{ url_for('index') }}">&larr; All tools</a></p>
+
+  <section class="hero">
+    <h1>Saudi Pro League</h1>
+    <p class="lede">The {{ meta.edition }} Saudi Pro League (Roshn Saudi League) clubs, ordered by final league position, with official website, social accounts, and Wikipedia page. Download as CSV or Excel.</p>
+  </section>
+
+  <div class="meta-bar">
+    <span class="badge {{ 'live' if meta.live else 'cached' }}">{{ 'Live fetch' if meta.live else 'Cached snapshot' }}</span>
+    <span>{{ meta.count }} clubs &middot; Season {{ meta.edition }}</span>
+    <a href="{{ meta.url }}" target="_blank" rel="noopener">Source &#8599;</a>
+    {% if not meta.live %}<a href="{{ url_for('saudi_pro_league_view', live=1) }}">Try live refresh &#8635;</a>{% endif %}
+  </div>
+  {% if meta.live_attempted and not meta.live %}<p class="muted note">Live refresh attempted, but spl.com.sa couldn't be fetched (JavaScript-rendered) — showing the cached snapshot.</p>{% endif %}
+  <p class="muted note">{{ meta.note }} Social accounts are official club handles; blank where not verifiable.</p>
+
+  <div class="exports">
+    <a class="btn" href="{{ url_for('saudi_pro_league_export', fmt='csv') }}">Download CSV</a>
+    <a class="btn ghost" href="{{ url_for('saudi_pro_league_export', fmt='xlsx') }}">Download Excel</a>
+  </div>
+
+  <div class="table-scroll">
+  <table class="data">
+    <thead>
+      <tr>
+        <th class="num">Pos</th>
+        <th>Club</th>
+        <th>City</th>
+        <th>Stadium</th>
+        <th class="num">Pts</th>
+        <th>Website</th>
+        {% for field, label in meta.social_fields %}<th>{{ label }}</th>{% endfor %}
+        <th>Wikipedia</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}
+      <tr>
+        <td class="num">{{ r.position }}</td>
+        <td>{{ r.club }}</td>
+        <td>{{ r.city }}</td>
+        <td>{{ r.stadium }}</td>
+        <td class="num">{{ r.points }}</td>
+        <td>{% if r.website %}<a href="{{ r.website }}" target="_blank" rel="noopener">{{ r.website_display }}</a>{% endif %}</td>
+        {% for field, label in meta.social_fields %}
+        <td class="social">{% if r[field] %}<a href="{{ r[field] }}" target="_blank" rel="noopener" title="{{ label }}">Link</a>{% else %}<span class="dash">&mdash;</span>{% endif %}</td>
+        {% endfor %}
+        <td class="social">{% if r.wikipedia %}<a href="{{ r.wikipedia }}" target="_blank" rel="noopener" title="Wikipedia">Wiki</a>{% else %}<span class="dash">&mdash;</span>{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+{% endblock %}
