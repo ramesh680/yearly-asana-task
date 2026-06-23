@@ -9,7 +9,7 @@ import io
 
 from flask import Flask, render_template, request, send_file, abort
 
-from tools import best_hospitals, best_colleges, premier_league, saudi_pro_league, twitch_streamers, wnba_teams, motorsports
+from tools import best_hospitals, best_colleges, premier_league, saudi_pro_league, twitch_streamers, wnba_teams, motorsports, beauty_brands
 
 app = Flask(__name__)
 
@@ -122,6 +122,19 @@ TOOLS = [
             "popularity. View and download as CSV or Excel."
         ),
         "endpoint": "motorsports_view",
+        "available": True,
+    },
+    {
+        "key": "beauty-brands",
+        "category": "Beauty",
+        "title": "Top Beauty Brands",
+        "description": (
+            "The 10 best-selling beauty brands on Ulta.com in 2025 (by share of "
+            "online sales, per WWD/Navigo Marketing), with each brand's category, "
+            "Ulta.com sales share, official website and social handles "
+            "(Instagram, X) plus Wikipedia. View and download as CSV or Excel."
+        ),
+        "endpoint": "beauty_brands_view",
         "available": True,
     },
 ]
@@ -281,6 +294,25 @@ def motorsports_export():
     return _send_csv(motorsports.to_csv(rows), base + ".csv")
 
 
+# ------------------------------------------------------------- Beauty Brands
+@app.route("/beauty-brands")
+def beauty_brands_view():
+    live = request.args.get("live") in ("1", "true", "yes")
+    rows, meta = beauty_brands.get_brands(live=live)
+    return render_template("beauty-brands.html", rows=rows, meta=meta)
+
+
+@app.route("/beauty-brands/export")
+def beauty_brands_export():
+    fmt = request.args.get("fmt", "csv")
+    rows, meta = beauty_brands.get_brands()
+    stamp = _dt.date.today().isoformat()
+    base = "top_beauty_brands_ulta_{}".format(stamp)
+    if fmt == "xlsx":
+        return _send_xlsx(beauty_brands.columns(), rows, "Top Beauty Brands", base + ".xlsx")
+    return _send_csv(beauty_brands.to_csv(rows), base + ".csv")
+
+
 # ---------------------------------------------------------------- Helpers
 def _send_csv(csv_text, filename):
     return send_file(
@@ -318,6 +350,7 @@ def _send_xlsx(cols, rows, sheet_title, filename):
         "Hours Watched": 16, "Twitch": 28,
         "Seed": 7, "Team": 26, "Arena": 26, "W": 6, "L": 6,
         "Series / Event": 26, "Category": 26,
+        "Brand": 24, "Ulta.com Share": 14,
     }
     for i, (label, _key) in enumerate(cols, start=1):
         ws.column_dimensions[get_column_letter(i)].width = width_by_label.get(label, 24)
