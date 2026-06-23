@@ -1,0 +1,52 @@
+name: Refresh Russell 3000
+
+# Runs once a year on July 1 (after the late-June Russell reconstitution),
+# and any time you trigger it manually from the Actions tab.
+on:
+  schedule:
+    - cron: "0 6 1 7 *"      # 06:00 UTC, July 1, every year
+  workflow_dispatch:
+    inputs:
+      full:
+        description: "Full re-enrichment of every company (slower). Leave false for incremental."
+        required: false
+        default: "false"
+
+permissions:
+  contents: write             # allow the job to commit refreshed data back
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Rebuild Russell 3000 dataset
+        run: |
+          if [ "${{ github.event.inputs.full }}" = "true" ]; then
+            python scripts/refresh_russell3000.py --full
+          else
+            python scripts/refresh_russell3000.py
+          fi
+
+      - name: Commit refreshed data
+        run: |
+          git config user.name  "russell-refresh-bot"
+          git config user.email "actions@github.com"
+          git add templates/russell-3000.html data/russell_3000.json data/russell3000_full.csv
+          if git diff --staged --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "Refresh Russell 3000 data ($(date -u +%Y-%m-%d))"
+            git push
+          fi
