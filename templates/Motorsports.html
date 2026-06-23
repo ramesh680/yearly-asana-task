@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Top Motorsports · {{ app_name }}{% endblock %}
+{% block content %}
+  <p class="crumbs"><a href="{{ url_for('index') }}">&larr; All tools</a></p>
+
+  <section class="hero">
+    <h1>Top Motorsports</h1>
+    <p class="lede">The most popular motorsport series and events, with discipline, official website, social accounts, and Wikipedia page. Download as CSV or Excel.</p>
+  </section>
+
+  <div class="meta-bar">
+    <span class="badge {{ 'live' if meta.live else 'cached' }}">{{ 'Live fetch' if meta.live else 'Cached snapshot' }}</span>
+    <span>Top {{ meta.count }} &middot; {{ meta.edition }}</span>
+    <a href="{{ meta.url }}" target="_blank" rel="noopener">Source &#8599;</a>
+    {% if not meta.live %}<a href="{{ url_for('motorsports_view', live=1) }}">Try live refresh &#8635;</a>{% endif %}
+  </div>
+  <p class="muted note">{{ meta.note }} Social accounts are official series/event handles; blank where not verifiable.</p>
+
+  <div class="exports">
+    <a class="btn" href="{{ url_for('motorsports_export', fmt='csv') }}">Download CSV</a>
+    <a class="btn ghost" href="{{ url_for('motorsports_export', fmt='xlsx') }}">Download Excel</a>
+  </div>
+
+  <div class="table-scroll">
+  <table class="data">
+    <thead>
+      <tr>
+        <th class="num">Rank</th>
+        <th>Series / Event</th>
+        <th>Category</th>
+        <th>Website</th>
+        {% for field, label in meta.social_fields %}<th>{{ label }}</th>{% endfor %}
+        <th>Wikipedia</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}
+      <tr>
+        <td class="num">{{ r.rank }}</td>
+        <td>{{ r.series }}</td>
+        <td>{{ r.category }}</td>
+        <td>{% if r.website %}<a href="{{ r.website }}" target="_blank" rel="noopener">{{ r.website_display }}</a>{% endif %}</td>
+        {% for field, label in meta.social_fields %}
+        <td class="social">{% if r[field] %}<a href="{{ r[field] }}" target="_blank" rel="noopener" title="{{ label }}">Link</a>{% else %}<span class="dash">&mdash;</span>{% endif %}</td>
+        {% endfor %}
+        <td class="social">{% if r.wikipedia %}<a href="{{ r.wikipedia }}" target="_blank" rel="noopener" title="Wikipedia">Wiki</a>{% else %}<span class="dash">&mdash;</span>{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+{% endblock %}
