@@ -9,7 +9,7 @@ import io
 
 from flask import Flask, render_template, request, send_file, abort
 
-from tools import best_hospitals, best_colleges, premier_league, saudi_pro_league
+from tools import best_hospitals, best_colleges, premier_league, saudi_pro_league, twitch_streamers
 
 app = Flask(__name__)
 
@@ -80,6 +80,20 @@ TOOLS = [
             "Wikipedia. View and download as CSV or Excel."
         ),
         "endpoint": "saudi_pro_league_view",
+        "available": True,
+    },
+    {
+        "key": "twitch-streamers",
+        "category": "Streaming",
+        "title": "Top Twitch Streamers",
+        "description": (
+            "The top channels from TwitchTracker's overall ranking (a 30-day "
+            "blend of average viewers, followers, views and stream time), with "
+            "each channel's average viewers, all-time peak, hours watched, "
+            "Twitch link and social handles (X, YouTube) plus Wikipedia. View "
+            "and download as CSV or Excel."
+        ),
+        "endpoint": "twitch_streamers_view",
         "available": True,
     },
 ]
@@ -182,6 +196,25 @@ def saudi_pro_league_export():
     return _send_csv(saudi_pro_league.to_csv(rows), base + ".csv")
 
 
+# ----------------------------------------------------------- Twitch Streamers
+@app.route("/twitch-streamers")
+def twitch_streamers_view():
+    live = request.args.get("live") in ("1", "true", "yes")
+    rows, meta = twitch_streamers.get_streamers(live=live)
+    return render_template("twitch-streamers.html", rows=rows, meta=meta)
+
+
+@app.route("/twitch-streamers/export")
+def twitch_streamers_export():
+    fmt = request.args.get("fmt", "csv")
+    rows, meta = twitch_streamers.get_streamers()
+    stamp = _dt.date.today().isoformat()
+    base = "top_twitch_streamers_{}".format(stamp)
+    if fmt == "xlsx":
+        return _send_xlsx(twitch_streamers.columns(), rows, "Top Twitch Streamers", base + ".xlsx")
+    return _send_csv(twitch_streamers.to_csv(rows), base + ".csv")
+
+
 # ---------------------------------------------------------------- Helpers
 def _send_csv(csv_text, filename):
     return send_file(
@@ -215,6 +248,8 @@ def _send_xlsx(cols, rows, sheet_title, filename):
         "Score": 9, "Website": 30, "Facebook": 42, "Instagram": 38,
         "X / Twitter": 30, "YouTube": 44, "LinkedIn": 52, "Wikipedia": 30,
         "Position": 9, "Club": 30, "Stadium": 28, "Points": 9,
+        "Channel": 26, "Avg Viewers": 14, "Peak Viewers": 14,
+        "Hours Watched": 16, "Twitch": 28,
     }
     for i, (label, _key) in enumerate(cols, start=1):
         ws.column_dimensions[get_column_letter(i)].width = width_by_label.get(label, 24)
