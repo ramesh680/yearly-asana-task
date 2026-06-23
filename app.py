@@ -9,7 +9,7 @@ import io
 
 from flask import Flask, render_template, request, send_file, abort
 
-from tools import best_hospitals, best_colleges, premier_league, saudi_pro_league, twitch_streamers, wnba_teams
+from tools import best_hospitals, best_colleges, premier_league, saudi_pro_league, twitch_streamers, wnba_teams, motorsports
 
 app = Flask(__name__)
 
@@ -108,6 +108,20 @@ TOOLS = [
             "download as CSV or Excel."
         ),
         "endpoint": "wnba_teams_view",
+        "available": True,
+    },
+    {
+        "key": "motorsports",
+        "category": "Motorsport",
+        "title": "Top Motorsports",
+        "description": (
+            "The 10 most popular motorsport series and events (Formula 1, "
+            "NASCAR, MotoGP, IndyCar, Le Mans, WRC, Dakar, Formula E, MXGP, "
+            "Isle of Man TT), with each one's discipline, official website and "
+            "social handles (X, Instagram, YouTube) plus Wikipedia. Ranked by "
+            "popularity. View and download as CSV or Excel."
+        ),
+        "endpoint": "motorsports_view",
         "available": True,
     },
 ]
@@ -248,6 +262,25 @@ def wnba_teams_export():
     return _send_csv(wnba_teams.to_csv(rows), base + ".csv")
 
 
+# ---------------------------------------------------------------- Motorsports
+@app.route("/motorsports")
+def motorsports_view():
+    live = request.args.get("live") in ("1", "true", "yes")
+    rows, meta = motorsports.get_motorsports(live=live)
+    return render_template("motorsports.html", rows=rows, meta=meta)
+
+
+@app.route("/motorsports/export")
+def motorsports_export():
+    fmt = request.args.get("fmt", "csv")
+    rows, meta = motorsports.get_motorsports()
+    stamp = _dt.date.today().isoformat()
+    base = "top_motorsports_{}".format(stamp)
+    if fmt == "xlsx":
+        return _send_xlsx(motorsports.columns(), rows, "Top Motorsports", base + ".xlsx")
+    return _send_csv(motorsports.to_csv(rows), base + ".csv")
+
+
 # ---------------------------------------------------------------- Helpers
 def _send_csv(csv_text, filename):
     return send_file(
@@ -284,6 +317,7 @@ def _send_xlsx(cols, rows, sheet_title, filename):
         "Channel": 26, "Avg Viewers": 14, "Peak Viewers": 14,
         "Hours Watched": 16, "Twitch": 28,
         "Seed": 7, "Team": 26, "Arena": 26, "W": 6, "L": 6,
+        "Series / Event": 26, "Category": 26,
     }
     for i, (label, _key) in enumerate(cols, start=1):
         ws.column_dimensions[get_column_letter(i)].width = width_by_label.get(label, 24)
