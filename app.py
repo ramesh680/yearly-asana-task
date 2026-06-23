@@ -9,7 +9,7 @@ import io
 
 from flask import Flask, render_template, request, send_file, abort
 
-from tools import best_hospitals, best_colleges, premier_league
+from tools import best_hospitals, best_colleges, premier_league, saudi_pro_league
 
 app = Flask(__name__)
 
@@ -66,6 +66,20 @@ TOOLS = [
             "View and download as CSV or Excel."
         ),
         "endpoint": "premier_league_view",
+        "available": True,
+    },
+    {
+        "key": "saudi-pro-league",
+        "category": "Sports",
+        "title": "Saudi Pro League",
+        "description": (
+            "The 18 Saudi Pro League (Roshn Saudi League) clubs (2025/26 season, "
+            "via the official Saudi Pro League site), ordered by final league "
+            "position, with each club's home city, stadium, points, official "
+            "website and social handles (X, Instagram, Facebook, YouTube) plus "
+            "Wikipedia. View and download as CSV or Excel."
+        ),
+        "endpoint": "saudi_pro_league_view",
         "available": True,
     },
 ]
@@ -147,6 +161,25 @@ def premier_league_export():
     if fmt == "xlsx":
         return _send_xlsx(premier_league.columns(), rows, "Premier League", base + ".xlsx")
     return _send_csv(premier_league.to_csv(rows), base + ".csv")
+
+
+# ---------------------------------------------------------- - Saudi Pro League
+@app.route("/saudi-pro-league")
+def saudi_pro_league_view():
+    live = request.args.get("live") in ("1", "true", "yes")
+    rows, meta = saudi_pro_league.get_clubs(live=live)
+    return render_template("saudi-pro-league.html", rows=rows, meta=meta)
+
+
+@app.route("/saudi-pro-league/export")
+def saudi_pro_league_export():
+    fmt = request.args.get("fmt", "csv")
+    rows, meta = saudi_pro_league.get_clubs()
+    stamp = _dt.date.today().isoformat()
+    base = "saudi_pro_league_clubs_{}_{}".format(meta["edition"].replace("/", "-"), stamp)
+    if fmt == "xlsx":
+        return _send_xlsx(saudi_pro_league.columns(), rows, "Saudi Pro League", base + ".xlsx")
+    return _send_csv(saudi_pro_league.to_csv(rows), base + ".csv")
 
 
 # ---------------------------------------------------------------- Helpers
