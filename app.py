@@ -9,7 +9,7 @@ import io
 
 from flask import Flask, render_template, request, send_file, abort
 
-from tools import best_hospitals, best_colleges
+from tools import best_hospitals, best_colleges, premier_league
 
 app = Flask(__name__)
 
@@ -52,6 +52,20 @@ TOOLS = [
             "LinkedIn). View and download as CSV or Excel."
         ),
         "endpoint": "russell_3000_view",
+        "available": True,
+    },
+    {
+        "key": "premier-league",
+        "category": "Sports",
+        "title": "English Premier League",
+        "description": (
+            "The 20 English Premier League clubs (2025/26 season, via the "
+            "official Premier League site), ordered by final league position, "
+            "with each club's home city, stadium, points, official website and "
+            "social handles (X, Instagram, Facebook, YouTube) plus Wikipedia. "
+            "View and download as CSV or Excel."
+        ),
+        "endpoint": "premier_league_view",
         "available": True,
     },
 ]
@@ -116,6 +130,25 @@ def russell_3000_view():
     with open(path, encoding="utf-8") as f:
         return f.read()
 
+# ------------------------------------------------------------ Premier League
+@app.route("/premier-league")
+def premier_league_view():
+    live = request.args.get("live") in ("1", "true", "yes")
+    rows, meta = premier_league.get_clubs(live=live)
+    return render_template("premier-league.html", rows=rows, meta=meta)
+
+
+@app.route("/premier-league/export")
+def premier_league_export():
+    fmt = request.args.get("fmt", "csv")
+    rows, meta = premier_league.get_clubs()
+    stamp = _dt.date.today().isoformat()
+    base = "premier_league_clubs_{}_{}".format(meta["edition"].replace("/", "-"), stamp)
+    if fmt == "xlsx":
+        return _send_xlsx(premier_league.columns(), rows, "Premier League", base + ".xlsx")
+    return _send_csv(premier_league.to_csv(rows), base + ".csv")
+
+
 # ---------------------------------------------------------------- Helpers
 def _send_csv(csv_text, filename):
     return send_file(
@@ -148,6 +181,7 @@ def _send_xlsx(cols, rows, sheet_title, filename):
         "Rank": 8, "Hospital": 52, "University": 44, "City": 16, "State": 18,
         "Score": 9, "Website": 30, "Facebook": 42, "Instagram": 38,
         "X / Twitter": 30, "YouTube": 44, "LinkedIn": 52, "Wikipedia": 30,
+        "Position": 9, "Club": 30, "Stadium": 28, "Points": 9,
     }
     for i, (label, _key) in enumerate(cols, start=1):
         ws.column_dimensions[get_column_letter(i)].width = width_by_label.get(label, 24)
