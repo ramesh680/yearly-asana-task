@@ -9,7 +9,7 @@ import io
 
 from flask import Flask, render_template, request, send_file, abort
 
-from tools import best_hospitals, best_colleges, premier_league, saudi_pro_league, twitch_streamers, wnba_teams, motorsports, beauty_brands
+from tools import best_hospitals, best_colleges, premier_league, saudi_pro_league, twitch_streamers, wnba_teams, motorsports, beauty_brands, nfl_teams, racquet_sports
 
 app = Flask(__name__)
 
@@ -136,6 +136,31 @@ TOOLS = [
             "as CSV or Excel."
         ),
         "endpoint": "beauty_brands_view",
+        "available": True,
+    },
+    {
+        "key": "nfl-teams",
+        "category": "American Football",
+        "title": "National Football League",
+        "description": (
+            "All 32 NFL teams grouped by conference (AFC/NFC) and division, with "
+            "each team's home city, stadium, official website and social handles "
+            "(X, Instagram) plus Wikipedia. View and download as CSV or Excel."
+        ),
+        "endpoint": "nfl_teams_view",
+        "available": True,
+    },
+    {
+        "key": "racquet-sports",
+        "category": "Racquet Sports",
+        "title": "Racquet Sports",
+        "description": (
+            "Racket & racquet sports with their international governing body, "
+            "official website and social handles (X, Instagram) plus Wikipedia. "
+            "Major sports first, then others from Wikipedia's list. View and "
+            "download as CSV or Excel."
+        ),
+        "endpoint": "racquet_sports_view",
         "available": True,
     },
 ]
@@ -314,6 +339,44 @@ def beauty_brands_export():
     return _send_csv(beauty_brands.to_csv(rows), base + ".csv")
 
 
+# ----------------------------------------------------------- National Football League
+@app.route("/nfl-teams")
+def nfl_teams_view():
+    live = request.args.get("live") in ("1", "true", "yes")
+    rows, meta = nfl_teams.get_teams(live=live)
+    return render_template("nfl-teams.html", rows=rows, meta=meta)
+
+
+@app.route("/nfl-teams/export")
+def nfl_teams_export():
+    fmt = request.args.get("fmt", "csv")
+    rows, meta = nfl_teams.get_teams()
+    stamp = _dt.date.today().isoformat()
+    base = "nfl_teams_{}".format(stamp)
+    if fmt == "xlsx":
+        return _send_xlsx(nfl_teams.columns(), rows, "NFL Teams", base + ".xlsx")
+    return _send_csv(nfl_teams.to_csv(rows), base + ".csv")
+
+
+# ----------------------------------------------------------- Racquet Sports
+@app.route("/racquet-sports")
+def racquet_sports_view():
+    live = request.args.get("live") in ("1", "true", "yes")
+    rows, meta = racquet_sports.get_sports(live=live)
+    return render_template("racquet-sports.html", rows=rows, meta=meta)
+
+
+@app.route("/racquet-sports/export")
+def racquet_sports_export():
+    fmt = request.args.get("fmt", "csv")
+    rows, meta = racquet_sports.get_sports()
+    stamp = _dt.date.today().isoformat()
+    base = "racquet_sports_{}".format(stamp)
+    if fmt == "xlsx":
+        return _send_xlsx(racquet_sports.columns(), rows, "Racquet Sports", base + ".xlsx")
+    return _send_csv(racquet_sports.to_csv(rows), base + ".csv")
+
+
 # ---------------------------------------------------------------- Helpers
 def _send_csv(csv_text, filename):
     return send_file(
@@ -343,6 +406,7 @@ def _send_xlsx(cols, rows, sheet_title, filename):
         ws.append([r.get(key, "") for _label, key in cols])
 
     width_by_label = {
+        "Team": 24, "Conference": 12, "Division": 10, "Stadium": 30, "Sport": 22, "Governing Body": 40,
         "Rank": 8, "Hospital": 52, "University": 44, "City": 16, "State": 18,
         "Score": 9, "Website": 30, "Facebook": 42, "Instagram": 38,
         "X / Twitter": 30, "YouTube": 44, "LinkedIn": 52, "Wikipedia": 30,
