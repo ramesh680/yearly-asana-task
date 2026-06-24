@@ -9,7 +9,7 @@ import io
 
 from flask import Flask, render_template, request, send_file, abort
 
-from tools import best_hospitals, best_colleges, premier_league, saudi_pro_league, twitch_streamers, wnba_teams, motorsports, beauty_brands, nfl_teams, racquet_sports
+from tools import best_hospitals, best_colleges, premier_league, saudi_pro_league, twitch_streamers, wnba_teams, motorsports, beauty_brands, nfl_teams, racquet_sports, golf_tours, nba_teams, nhl_teams, mls_teams, nwsl_teams
 
 app = Flask(__name__)
 
@@ -161,6 +161,67 @@ TOOLS = [
             "download as CSV or Excel."
         ),
         "endpoint": "racquet_sports_view",
+        "available": True,
+    },
+
+    {
+        "key": "golf-tours",
+        "category": "Golf",
+        "title": "Golf Tours",
+        "description": (
+            "Major professional golf tours and circuits. With official website and social handles (Facebook, "
+            "Instagram, X, YouTube, TikTok) plus Wikipedia. View and download "
+            "as CSV or Excel."
+        ),
+        "endpoint": "golf_tours_view",
+        "available": True,
+    },
+    {
+        "key": "nba-teams",
+        "category": "Basketball",
+        "title": "National Basketball Association",
+        "description": (
+            "All 30 NBA teams by conference and division. With official website and social handles (Facebook, "
+            "Instagram, X, YouTube, TikTok) plus Wikipedia. View and download "
+            "as CSV or Excel."
+        ),
+        "endpoint": "nba_teams_view",
+        "available": True,
+    },
+    {
+        "key": "nhl-teams",
+        "category": "Ice Hockey",
+        "title": "National Hockey League",
+        "description": (
+            "All 32 NHL teams by conference and division. With official website and social handles (Facebook, "
+            "Instagram, X, YouTube, TikTok) plus Wikipedia. View and download "
+            "as CSV or Excel."
+        ),
+        "endpoint": "nhl_teams_view",
+        "available": True,
+    },
+    {
+        "key": "mls-teams",
+        "category": "Soccer",
+        "title": "Major League Soccer",
+        "description": (
+            "All 30 MLS clubs by conference. With official website and social handles (Facebook, "
+            "Instagram, X, YouTube, TikTok) plus Wikipedia. View and download "
+            "as CSV or Excel."
+        ),
+        "endpoint": "mls_teams_view",
+        "available": True,
+    },
+    {
+        "key": "nwsl-teams",
+        "category": "Soccer",
+        "title": "National Women's Soccer League",
+        "description": (
+            "NWSL clubs with home city and stadium. With official website and social handles (Facebook, "
+            "Instagram, X, YouTube, TikTok) plus Wikipedia. View and download "
+            "as CSV or Excel."
+        ),
+        "endpoint": "nwsl_teams_view",
         "available": True,
     },
 ]
@@ -375,6 +436,96 @@ def racquet_sports_export():
     if fmt == "xlsx":
         return _send_xlsx(racquet_sports.columns(), rows, "Racquet Sports", base + ".xlsx")
     return _send_csv(racquet_sports.to_csv(rows), base + ".csv")
+
+
+@app.route("/golf-tours")
+def golf_tours_view():
+    live = request.args.get("live") in ("1", "true", "yes")
+    rows, meta = golf_tours.get_rows(live=live)
+    return render_template("golf-tours.html", rows=rows, meta=meta)
+
+
+@app.route("/golf-tours/export")
+def golf_tours_export():
+    fmt = request.args.get("fmt", "csv")
+    rows, meta = golf_tours.get_rows()
+    stamp = _dt.date.today().isoformat()
+    base = "golf_tours_" + stamp
+    if fmt == "xlsx":
+        return _send_xlsx(golf_tours.columns(), rows, "Golf Tours", base + ".xlsx")
+    return _send_csv(golf_tours.to_csv(rows), base + ".csv")
+
+
+@app.route("/nba-teams")
+def nba_teams_view():
+    live = request.args.get("live") in ("1", "true", "yes")
+    rows, meta = nba_teams.get_rows(live=live)
+    return render_template("nba-teams.html", rows=rows, meta=meta)
+
+
+@app.route("/nba-teams/export")
+def nba_teams_export():
+    fmt = request.args.get("fmt", "csv")
+    rows, meta = nba_teams.get_rows()
+    stamp = _dt.date.today().isoformat()
+    base = "nba_teams_" + stamp
+    if fmt == "xlsx":
+        return _send_xlsx(nba_teams.columns(), rows, "National Basketball Association", base + ".xlsx")
+    return _send_csv(nba_teams.to_csv(rows), base + ".csv")
+
+
+@app.route("/nhl-teams")
+def nhl_teams_view():
+    live = request.args.get("live") in ("1", "true", "yes")
+    rows, meta = nhl_teams.get_rows(live=live)
+    return render_template("nhl-teams.html", rows=rows, meta=meta)
+
+
+@app.route("/nhl-teams/export")
+def nhl_teams_export():
+    fmt = request.args.get("fmt", "csv")
+    rows, meta = nhl_teams.get_rows()
+    stamp = _dt.date.today().isoformat()
+    base = "nhl_teams_" + stamp
+    if fmt == "xlsx":
+        return _send_xlsx(nhl_teams.columns(), rows, "National Hockey League", base + ".xlsx")
+    return _send_csv(nhl_teams.to_csv(rows), base + ".csv")
+
+
+@app.route("/mls-teams")
+def mls_teams_view():
+    live = request.args.get("live") in ("1", "true", "yes")
+    rows, meta = mls_teams.get_rows(live=live)
+    return render_template("mls-teams.html", rows=rows, meta=meta)
+
+
+@app.route("/mls-teams/export")
+def mls_teams_export():
+    fmt = request.args.get("fmt", "csv")
+    rows, meta = mls_teams.get_rows()
+    stamp = _dt.date.today().isoformat()
+    base = "mls_teams_" + stamp
+    if fmt == "xlsx":
+        return _send_xlsx(mls_teams.columns(), rows, "Major League Soccer", base + ".xlsx")
+    return _send_csv(mls_teams.to_csv(rows), base + ".csv")
+
+
+@app.route("/nwsl-teams")
+def nwsl_teams_view():
+    live = request.args.get("live") in ("1", "true", "yes")
+    rows, meta = nwsl_teams.get_rows(live=live)
+    return render_template("nwsl-teams.html", rows=rows, meta=meta)
+
+
+@app.route("/nwsl-teams/export")
+def nwsl_teams_export():
+    fmt = request.args.get("fmt", "csv")
+    rows, meta = nwsl_teams.get_rows()
+    stamp = _dt.date.today().isoformat()
+    base = "nwsl_teams_" + stamp
+    if fmt == "xlsx":
+        return _send_xlsx(nwsl_teams.columns(), rows, "National Women's Soccer League", base + ".xlsx")
+    return _send_csv(nwsl_teams.to_csv(rows), base + ".csv")
 
 
 # ---------------------------------------------------------------- Helpers
