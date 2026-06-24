@@ -9,7 +9,7 @@ import io
 
 from flask import Flask, render_template, request, send_file, abort
 
-from tools import best_hospitals, best_colleges, premier_league, saudi_pro_league, twitch_streamers, wnba_teams, motorsports, beauty_brands, nfl_teams, racquet_sports, golf_tours, nba_teams, nhl_teams, mls_teams, nwsl_teams
+from tools import best_hospitals, best_colleges, premier_league, saudi_pro_league, twitch_streamers, wnba_teams, motorsports, beauty_brands, nfl_teams, racquet_sports, golf_tours, nba_teams, nhl_teams, mls_teams, nwsl_teams, mlb_teams, milb_teams, brasileirao, bundesliga, laliga
 
 app = Flask(__name__)
 
@@ -222,6 +222,67 @@ TOOLS = [
             "as CSV or Excel."
         ),
         "endpoint": "nwsl_teams_view",
+        "available": True,
+    },
+
+    {
+        "key": "mlb-teams",
+        "category": "Baseball",
+        "title": "Major League Baseball",
+        "description": (
+            "All 30 MLB teams by league and division. With official website and social handles (Facebook, "
+            "Instagram, X, YouTube, TikTok) plus Wikipedia. View and download "
+            "as CSV or Excel."
+        ),
+        "endpoint": "mlb_teams_view",
+        "available": True,
+    },
+    {
+        "key": "milb-teams",
+        "category": "Baseball",
+        "title": "Minor League Baseball",
+        "description": (
+            "Triple-A clubs (top minor-league tier) with their MLB parent club. With official website and social handles (Facebook, "
+            "Instagram, X, YouTube, TikTok) plus Wikipedia. View and download "
+            "as CSV or Excel."
+        ),
+        "endpoint": "milb_teams_view",
+        "available": True,
+    },
+    {
+        "key": "brasileirao",
+        "category": "Soccer",
+        "title": "Brasileirão Série A",
+        "description": (
+            "Campeonato Brasileiro Série A clubs (2025 season). With official website and social handles (Facebook, "
+            "Instagram, X, YouTube, TikTok) plus Wikipedia. View and download "
+            "as CSV or Excel."
+        ),
+        "endpoint": "brasileirao_view",
+        "available": True,
+    },
+    {
+        "key": "bundesliga",
+        "category": "Soccer",
+        "title": "Bundesliga",
+        "description": (
+            "Bundesliga clubs (2025-26 season). With official website and social handles (Facebook, "
+            "Instagram, X, YouTube, TikTok) plus Wikipedia. View and download "
+            "as CSV or Excel."
+        ),
+        "endpoint": "bundesliga_view",
+        "available": True,
+    },
+    {
+        "key": "laliga",
+        "category": "Soccer",
+        "title": "LaLiga",
+        "description": (
+            "LaLiga clubs (2025-26 season). With official website and social handles (Facebook, "
+            "Instagram, X, YouTube, TikTok) plus Wikipedia. View and download "
+            "as CSV or Excel."
+        ),
+        "endpoint": "laliga_view",
         "available": True,
     },
 ]
@@ -526,6 +587,96 @@ def nwsl_teams_export():
     if fmt == "xlsx":
         return _send_xlsx(nwsl_teams.columns(), rows, "National Women's Soccer League", base + ".xlsx")
     return _send_csv(nwsl_teams.to_csv(rows), base + ".csv")
+
+
+@app.route("/mlb-teams")
+def mlb_teams_view():
+    live = request.args.get("live") in ("1", "true", "yes")
+    rows, meta = mlb_teams.get_rows(live=live)
+    return render_template("mlb-teams.html", rows=rows, meta=meta)
+
+
+@app.route("/mlb-teams/export")
+def mlb_teams_export():
+    fmt = request.args.get("fmt", "csv")
+    rows, meta = mlb_teams.get_rows()
+    stamp = _dt.date.today().isoformat()
+    base = "mlb_teams_" + stamp
+    if fmt == "xlsx":
+        return _send_xlsx(mlb_teams.columns(), rows, "Major League Baseball", base + ".xlsx")
+    return _send_csv(mlb_teams.to_csv(rows), base + ".csv")
+
+
+@app.route("/milb-teams")
+def milb_teams_view():
+    live = request.args.get("live") in ("1", "true", "yes")
+    rows, meta = milb_teams.get_rows(live=live)
+    return render_template("milb-teams.html", rows=rows, meta=meta)
+
+
+@app.route("/milb-teams/export")
+def milb_teams_export():
+    fmt = request.args.get("fmt", "csv")
+    rows, meta = milb_teams.get_rows()
+    stamp = _dt.date.today().isoformat()
+    base = "milb_teams_" + stamp
+    if fmt == "xlsx":
+        return _send_xlsx(milb_teams.columns(), rows, "Minor League Baseball", base + ".xlsx")
+    return _send_csv(milb_teams.to_csv(rows), base + ".csv")
+
+
+@app.route("/brasileirao")
+def brasileirao_view():
+    live = request.args.get("live") in ("1", "true", "yes")
+    rows, meta = brasileirao.get_rows(live=live)
+    return render_template("brasileirao.html", rows=rows, meta=meta)
+
+
+@app.route("/brasileirao/export")
+def brasileirao_export():
+    fmt = request.args.get("fmt", "csv")
+    rows, meta = brasileirao.get_rows()
+    stamp = _dt.date.today().isoformat()
+    base = "brasileirao_" + stamp
+    if fmt == "xlsx":
+        return _send_xlsx(brasileirao.columns(), rows, "Brasileirão Série A", base + ".xlsx")
+    return _send_csv(brasileirao.to_csv(rows), base + ".csv")
+
+
+@app.route("/bundesliga")
+def bundesliga_view():
+    live = request.args.get("live") in ("1", "true", "yes")
+    rows, meta = bundesliga.get_rows(live=live)
+    return render_template("bundesliga.html", rows=rows, meta=meta)
+
+
+@app.route("/bundesliga/export")
+def bundesliga_export():
+    fmt = request.args.get("fmt", "csv")
+    rows, meta = bundesliga.get_rows()
+    stamp = _dt.date.today().isoformat()
+    base = "bundesliga_" + stamp
+    if fmt == "xlsx":
+        return _send_xlsx(bundesliga.columns(), rows, "Bundesliga", base + ".xlsx")
+    return _send_csv(bundesliga.to_csv(rows), base + ".csv")
+
+
+@app.route("/laliga")
+def laliga_view():
+    live = request.args.get("live") in ("1", "true", "yes")
+    rows, meta = laliga.get_rows(live=live)
+    return render_template("laliga.html", rows=rows, meta=meta)
+
+
+@app.route("/laliga/export")
+def laliga_export():
+    fmt = request.args.get("fmt", "csv")
+    rows, meta = laliga.get_rows()
+    stamp = _dt.date.today().isoformat()
+    base = "laliga_" + stamp
+    if fmt == "xlsx":
+        return _send_xlsx(laliga.columns(), rows, "LaLiga", base + ".xlsx")
+    return _send_csv(laliga.to_csv(rows), base + ".csv")
 
 
 # ---------------------------------------------------------------- Helpers
