@@ -19,12 +19,14 @@ except Exception:
     requests = None
 
 from . import beauty_brands_data as DATA
+from . import socials
 
 SOCIAL_FIELDS = [
     ("facebook", "Facebook"),
     ("instagram", "Instagram"),
     ("twitter", "X / Twitter"),
     ("youtube", "YouTube"),
+    ("tiktok", "TikTok"),
 ]
 
 INFO = {
@@ -78,6 +80,7 @@ def get_brands(live: bool = False):
         }
         for field, _label in SOCIAL_FIELDS:
             item[field] = _clean(r.get(field))
+        socials.fill(item, item.get("brand"))
         item["wikipedia"] = _clean(r.get("wikipedia"))
         rows.append(item)
 

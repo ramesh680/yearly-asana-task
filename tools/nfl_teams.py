@@ -6,8 +6,15 @@ try:
 except Exception:
     requests = None
 from . import nfl_teams_data as DATA
+from . import socials
 
-SOCIAL_FIELDS = [("twitter", "X / Twitter"), ("instagram", "Instagram")]
+SOCIAL_FIELDS = [
+    ("facebook", "Facebook"),
+    ("instagram", "Instagram"),
+    ("twitter", "X / Twitter"),
+    ("youtube", "YouTube"),
+    ("tiktok", "TikTok"),
+]
 INFO = {"label": "National Football League - Teams", "edition": DATA.NFL_EDITION,
         "url": DATA.NFL_SOURCE_URL,
         "note": "All 32 NFL teams grouped by conference (AFC/NFC) and division."}
@@ -36,6 +43,7 @@ def get_teams(live: bool = False):
                 "city": _clean(r.get("city")), "stadium": _clean(r.get("stadium")),
                 "website": website, "website_display": _display(website)}
         for f, _l in SOCIAL_FIELDS: item[f] = _clean(r.get(f))
+        socials.fill(item, item.get("team"))
         item["wikipedia"] = _clean(r.get("wikipedia"))
         rows.append(item)
     meta = {"label": INFO["label"], "edition": INFO["edition"], "url": INFO["url"],

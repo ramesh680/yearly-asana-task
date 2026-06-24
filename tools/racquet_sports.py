@@ -6,8 +6,15 @@ try:
 except Exception:
     requests = None
 from . import racquet_sports_data as DATA
+from . import socials
 
-SOCIAL_FIELDS = [("twitter", "X / Twitter"), ("instagram", "Instagram")]
+SOCIAL_FIELDS = [
+    ("facebook", "Facebook"),
+    ("instagram", "Instagram"),
+    ("twitter", "X / Twitter"),
+    ("youtube", "YouTube"),
+    ("tiktok", "TikTok"),
+]
 INFO = {"label": "Racquet Sports", "edition": DATA.RACQUET_EDITION, "url": DATA.RACQUET_SOURCE_URL,
         "note": "Major racket sports list their international governing body; other sports link to Wikipedia (most have no single global body)."}
 _HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"}
@@ -32,6 +39,7 @@ def get_sports(live: bool = False):
                 "governing_body": _clean(r.get("governing_body")),
                 "website": website, "website_display": _display(website)}
         for f, _l in SOCIAL_FIELDS: item[f] = _clean(r.get(f))
+        socials.fill(item, item.get("sport"))
         item["wikipedia"] = _clean(r.get("wikipedia"))
         rows.append(item)
     meta = {"label": INFO["label"], "edition": INFO["edition"], "url": INFO["url"],

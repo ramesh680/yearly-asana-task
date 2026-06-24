@@ -19,6 +19,7 @@ except Exception:  # requests is listed in requirements.txt
     requests = None
 
 from . import hospitals_data as DATA
+from . import socials
 
 ALLOW_LIVE_FETCH = False
 
@@ -28,7 +29,7 @@ SOCIAL_FIELDS = [
     ("instagram", "Instagram"),
     ("twitter", "X / Twitter"),
     ("youtube", "YouTube"),
-    ("linkedin", "LinkedIn"),
+    ("tiktok", "TikTok"),
 ]
 
 SOURCES = {
@@ -79,6 +80,7 @@ def _normalize(rows, ordinal):
         }
         for field, _label in SOCIAL_FIELDS:
             item[field] = _clean(r.get(field))
+        socials.fill(item, item.get("hospital"))
         item["wikipedia"] = _clean(r.get("wikipedia"))
         out.append(item)
     return out

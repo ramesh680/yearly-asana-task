@@ -19,12 +19,14 @@ except Exception:
     requests = None
 
 from . import saudi_pro_league_data as DATA
+from . import socials
 
 SOCIAL_FIELDS = [
-    ("twitter", "X / Twitter"),
-    ("instagram", "Instagram"),
     ("facebook", "Facebook"),
+    ("instagram", "Instagram"),
+    ("twitter", "X / Twitter"),
     ("youtube", "YouTube"),
+    ("tiktok", "TikTok"),
 ]
 
 INFO = {
@@ -79,6 +81,7 @@ def get_clubs(live: bool = False):
         }
         for field, _label in SOCIAL_FIELDS:
             item[field] = _clean(r.get(field))
+        socials.fill(item, item.get("club"))
         item["wikipedia"] = _clean(r.get("wikipedia"))
         rows.append(item)
 

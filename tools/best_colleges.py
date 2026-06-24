@@ -18,13 +18,14 @@ except Exception:
     requests = None
 
 from . import colleges_data as DATA
+from . import socials
 
 SOCIAL_FIELDS = [
     ("facebook", "Facebook"),
     ("instagram", "Instagram"),
     ("twitter", "X / Twitter"),
     ("youtube", "YouTube"),
-    ("linkedin", "LinkedIn"),
+    ("tiktok", "TikTok"),
 ]
 
 INFO = {
@@ -81,6 +82,7 @@ def get_colleges(live: bool = False):
         }
         for field, _label in SOCIAL_FIELDS:
             item[field] = _clean(r.get(field))
+        socials.fill(item, item.get("university"))
         item["wikipedia"] = _clean(r.get("wikipedia"))
         rows.append(item)
 

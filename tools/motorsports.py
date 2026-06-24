@@ -17,11 +17,14 @@ except Exception:
     requests = None
 
 from . import motorsports_data as DATA
+from . import socials
 
 SOCIAL_FIELDS = [
-    ("twitter", "X / Twitter"),
+    ("facebook", "Facebook"),
     ("instagram", "Instagram"),
+    ("twitter", "X / Twitter"),
     ("youtube", "YouTube"),
+    ("tiktok", "TikTok"),
 ]
 
 INFO = {
@@ -74,6 +77,7 @@ def get_motorsports(live: bool = False):
         }
         for field, _label in SOCIAL_FIELDS:
             item[field] = _clean(r.get(field))
+        socials.fill(item, item.get("series"))
         item["wikipedia"] = _clean(r.get("wikipedia"))
         rows.append(item)
 
