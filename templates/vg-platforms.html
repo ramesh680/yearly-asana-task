@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Video Game Platforms · {{ app_name }}{% endblock %}
+{% block content %}
+  <p class="crumbs"><a href="{{ url_for('index') }}">&larr; All tools</a></p>
+  <section class="hero"><h1>Video Game Platforms</h1>
+  <p class="lede">Major video game consoles and platforms with their manufacturer. With official website and social accounts (Facebook, Instagram, X, YouTube, TikTok) plus Wikipedia. Download as CSV or Excel.</p></section>
+  <div class="meta-bar"><span class="badge cached">Cached snapshot</span>
+    <span>{{ meta.count }} &middot; {{ meta.edition }}</span>
+    <a href="{{ meta.url }}" target="_blank" rel="noopener">Source &#8599;</a></div>
+  <p class="muted note">Social links are verified where known and auto-generated from the name/handle otherwise (best-guess).</p>
+  <div class="exports">
+    <a class="btn" href="{{ url_for('vg_platforms_export', fmt='csv') }}">Download CSV</a>
+    <a class="btn ghost" href="{{ url_for('vg_platforms_export', fmt='xlsx') }}">Download Excel</a></div>
+  <div class="table-scroll"><table class="data"><thead><tr>
+    <th class="num">#</th><th>Platform</th><th>Maker</th><th>Website</th>
+    {% for field, label in meta.social_fields %}<th>{{ label }}</th>{% endfor %}<th>Wikipedia</th>
+  </tr></thead><tbody>
+  {% for r in rows %}<tr>
+    <td class="num">{{ r.rank }}</td><td>{{ r.platform }}</td><td>{{ r.maker }}</td>
+    <td>{% if r.website %}<a href="{{ r.website }}" target="_blank" rel="noopener">{{ r.website_display }}</a>{% endif %}</td>
+    {% for field, label in meta.social_fields %}<td class="social">{% if r[field] %}<a href="{{ r[field] }}" target="_blank" rel="noopener" title="{{ label }}">Link</a>{% else %}<span class="dash">&mdash;</span>{% endif %}</td>{% endfor %}
+    <td class="social">{% if r.wikipedia %}<a href="{{ r.wikipedia }}" target="_blank" rel="noopener" title="Wikipedia">Wiki</a>{% else %}<span class="dash">&mdash;</span>{% endif %}</td>
+  </tr>{% endfor %}
+  </tbody></table></div>
+{% endblock %}

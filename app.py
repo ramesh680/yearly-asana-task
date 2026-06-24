@@ -9,7 +9,7 @@ import io
 
 from flask import Flask, render_template, request, send_file, abort
 
-from tools import best_hospitals, best_colleges, premier_league, saudi_pro_league, twitch_streamers, wnba_teams, motorsports, beauty_brands, nfl_teams, racquet_sports, golf_tours, nba_teams, nhl_teams, mls_teams, nwsl_teams, mlb_teams, milb_teams, brasileirao, bundesliga, laliga, serie_a, sp500, combat_sports, sporting_events, streaming_services
+from tools import best_hospitals, best_colleges, premier_league, saudi_pro_league, twitch_streamers, wnba_teams, motorsports, beauty_brands, nfl_teams, racquet_sports, golf_tours, nba_teams, nhl_teams, mls_teams, nwsl_teams, mlb_teams, milb_teams, brasileirao, bundesliga, laliga, serie_a, sp500, combat_sports, sporting_events, streaming_services, ligue1, vg_franchises, vg_platforms, vg_publishers, cpg_brands
 
 app = Flask(__name__)
 
@@ -344,6 +344,67 @@ TOOLS = [
             "as CSV or Excel."
         ),
         "endpoint": "streaming_services_view",
+        "available": True,
+    },
+
+    {
+        "key": "ligue1",
+        "category": "Soccer",
+        "title": "Ligue 1",
+        "description": (
+            "Ligue 1 clubs (2025-26 season). With official website and social handles (Facebook, "
+            "Instagram, X, YouTube, TikTok) plus Wikipedia. View and download "
+            "as CSV or Excel."
+        ),
+        "endpoint": "ligue1_view",
+        "available": True,
+    },
+    {
+        "key": "vg-franchises",
+        "category": "Video Games",
+        "title": "Video Game Franchises",
+        "description": (
+            "Major video game franchises with their publisher. With official website and social handles (Facebook, "
+            "Instagram, X, YouTube, TikTok) plus Wikipedia. View and download "
+            "as CSV or Excel."
+        ),
+        "endpoint": "vg_franchises_view",
+        "available": True,
+    },
+    {
+        "key": "vg-platforms",
+        "category": "Video Games",
+        "title": "Video Game Platforms",
+        "description": (
+            "Major video game consoles and platforms with their manufacturer. With official website and social handles (Facebook, "
+            "Instagram, X, YouTube, TikTok) plus Wikipedia. View and download "
+            "as CSV or Excel."
+        ),
+        "endpoint": "vg_platforms_view",
+        "available": True,
+    },
+    {
+        "key": "vg-publishers",
+        "category": "Video Games",
+        "title": "Video Game Publishers",
+        "description": (
+            "Major video game publishers. With official website and social handles (Facebook, "
+            "Instagram, X, YouTube, TikTok) plus Wikipedia. View and download "
+            "as CSV or Excel."
+        ),
+        "endpoint": "vg_publishers_view",
+        "available": True,
+    },
+    {
+        "key": "cpg-brands",
+        "category": "Consumer Goods",
+        "title": "CPG Brands",
+        "description": (
+            "Major consumer packaged goods (CPG) brands with their parent company. With official website and social handles (Facebook, "
+            "Instagram, X, YouTube, TikTok) plus Wikipedia. View and download "
+            "as CSV or Excel."
+        ),
+        "endpoint": "cpg_brands_view",
         "available": True,
     },
 ]
@@ -828,6 +889,96 @@ def streaming_services_export():
     if fmt == "xlsx":
         return _send_xlsx(streaming_services.columns(), rows, "Streaming Services", base + ".xlsx")
     return _send_csv(streaming_services.to_csv(rows), base + ".csv")
+
+
+@app.route("/ligue1")
+def ligue1_view():
+    live = request.args.get("live") in ("1", "true", "yes")
+    rows, meta = ligue1.get_rows(live=live)
+    return render_template("ligue1.html", rows=rows, meta=meta)
+
+
+@app.route("/ligue1/export")
+def ligue1_export():
+    fmt = request.args.get("fmt", "csv")
+    rows, meta = ligue1.get_rows()
+    stamp = _dt.date.today().isoformat()
+    base = "ligue1_" + stamp
+    if fmt == "xlsx":
+        return _send_xlsx(ligue1.columns(), rows, "Ligue 1", base + ".xlsx")
+    return _send_csv(ligue1.to_csv(rows), base + ".csv")
+
+
+@app.route("/vg-franchises")
+def vg_franchises_view():
+    live = request.args.get("live") in ("1", "true", "yes")
+    rows, meta = vg_franchises.get_rows(live=live)
+    return render_template("vg-franchises.html", rows=rows, meta=meta)
+
+
+@app.route("/vg-franchises/export")
+def vg_franchises_export():
+    fmt = request.args.get("fmt", "csv")
+    rows, meta = vg_franchises.get_rows()
+    stamp = _dt.date.today().isoformat()
+    base = "vg_franchises_" + stamp
+    if fmt == "xlsx":
+        return _send_xlsx(vg_franchises.columns(), rows, "Video Game Franchises", base + ".xlsx")
+    return _send_csv(vg_franchises.to_csv(rows), base + ".csv")
+
+
+@app.route("/vg-platforms")
+def vg_platforms_view():
+    live = request.args.get("live") in ("1", "true", "yes")
+    rows, meta = vg_platforms.get_rows(live=live)
+    return render_template("vg-platforms.html", rows=rows, meta=meta)
+
+
+@app.route("/vg-platforms/export")
+def vg_platforms_export():
+    fmt = request.args.get("fmt", "csv")
+    rows, meta = vg_platforms.get_rows()
+    stamp = _dt.date.today().isoformat()
+    base = "vg_platforms_" + stamp
+    if fmt == "xlsx":
+        return _send_xlsx(vg_platforms.columns(), rows, "Video Game Platforms", base + ".xlsx")
+    return _send_csv(vg_platforms.to_csv(rows), base + ".csv")
+
+
+@app.route("/vg-publishers")
+def vg_publishers_view():
+    live = request.args.get("live") in ("1", "true", "yes")
+    rows, meta = vg_publishers.get_rows(live=live)
+    return render_template("vg-publishers.html", rows=rows, meta=meta)
+
+
+@app.route("/vg-publishers/export")
+def vg_publishers_export():
+    fmt = request.args.get("fmt", "csv")
+    rows, meta = vg_publishers.get_rows()
+    stamp = _dt.date.today().isoformat()
+    base = "vg_publishers_" + stamp
+    if fmt == "xlsx":
+        return _send_xlsx(vg_publishers.columns(), rows, "Video Game Publishers", base + ".xlsx")
+    return _send_csv(vg_publishers.to_csv(rows), base + ".csv")
+
+
+@app.route("/cpg-brands")
+def cpg_brands_view():
+    live = request.args.get("live") in ("1", "true", "yes")
+    rows, meta = cpg_brands.get_rows(live=live)
+    return render_template("cpg-brands.html", rows=rows, meta=meta)
+
+
+@app.route("/cpg-brands/export")
+def cpg_brands_export():
+    fmt = request.args.get("fmt", "csv")
+    rows, meta = cpg_brands.get_rows()
+    stamp = _dt.date.today().isoformat()
+    base = "cpg_brands_" + stamp
+    if fmt == "xlsx":
+        return _send_xlsx(cpg_brands.columns(), rows, "CPG Brands", base + ".xlsx")
+    return _send_csv(cpg_brands.to_csv(rows), base + ".csv")
 
 
 # ---------------------------------------------------------------- Helpers
