@@ -129,10 +129,11 @@ TOOLS = [
         "category": "Beauty",
         "title": "Top Beauty Brands",
         "description": (
-            "The 10 best-selling beauty brands on Ulta.com in 2025 (by share of "
-            "online sales, per WWD/Navigo Marketing), with each brand's category, "
-            "Ulta.com sales share, official website and social handles "
-            "(Instagram, X) plus Wikipedia. View and download as CSV or Excel."
+            "The top 500 beauty brands on Ulta.com. The top 10 are ranked by "
+            "2025 online sales share (WWD/Navigo Marketing) with category, share, "
+            "socials and Wikipedia; ranks 11-500 are Ulta's alphabetical brand "
+            "directory, each linking to its official Ulta page. View and download "
+            "as CSV or Excel."
         ),
         "endpoint": "beauty_brands_view",
         "available": True,
