@@ -5,16 +5,15 @@
 
   <section class="hero">
     <h1>Top Beauty Brands</h1>
-    <p class="lede">Beauty brands from Ulta.com. The top 10 are ranked by 2025 share of online sales (with category, share, socials and Wikipedia); the rest are Ulta's brand directory, alphabetical, each linking to its official Ulta page. Download as CSV or Excel.</p>
+    <p class="lede">500 beauty brands from Ulta.com. The top 10 are ranked by 2025 online sales share; the rest are Ulta's alphabetical brand directory, each linking to its official Ulta page. Download as CSV or Excel.</p>
   </section>
 
   <div class="meta-bar">
     <span class="badge {{ 'live' if meta.live else 'cached' }}">{{ 'Live fetch' if meta.live else 'Cached snapshot' }}</span>
     <span>Top {{ meta.count }} &middot; {{ meta.edition }}</span>
     <a href="{{ meta.url }}" target="_blank" rel="noopener">Source &#8599;</a>
-    {% if not meta.live %}<a href="{{ url_for('beauty_brands_view', live=1) }}">Try live refresh &#8635;</a>{% endif %}
   </div>
-  <p class="muted note">{{ meta.note }} Social/Wikipedia links shown for the ranked top 10; blank where not verifiable.</p>
+  <p class="muted note"><strong>Note:</strong> {{ meta.note }}</p>
 
   <div class="exports">
     <a class="btn" href="{{ url_for('beauty_brands_export', fmt='csv') }}">Download CSV</a>
