@@ -1,11 +1,12 @@
 """
 Top Beauty Brands tool.
 
-Serves the best-selling beauty brands on Ulta.com (by share of online sales)
-with each brand's category, Ulta.com online sales share, official website and
-social handles. Like the other tools, it serves a curated, versioned snapshot
-from ``beauty_brands_data.py``. Refresh the snapshot periodically by editing
-beauty_brands_data.py.
+Serves beauty brands sourced from Ulta.com. Ranks 1-10 are the best-selling
+brands on Ulta.com in 2025 by share of online sales (WWD / Navigo Marketing),
+with category, sales share and verified social/Wikipedia links. Ranks 11-500
+are Ulta's brand directory (ulta.com/brand/all) in alphabetical order, each
+linking to its official Ulta brand page. Serves a curated, versioned snapshot
+from ``beauty_brands_data.py``; refresh by re-reading ulta.com/brand/all.
 """
 from __future__ import annotations
 
@@ -25,10 +26,10 @@ SOCIAL_FIELDS = [
 ]
 
 INFO = {
-    "label": "Top Beauty Brands - Ulta.com online sales share",
+    "label": "Top Beauty Brands - Ulta.com",
     "edition": DATA.BEAUTY_EDITION,
     "url": DATA.BEAUTY_SOURCE_URL,
-    "note": "Ranked by 2025 share of online sales on ulta.com (Navigo Marketing via WWD); excludes in-store and app sales.",
+    "note": "Ranks 1-10 by 2025 Ulta.com online sales share (WWD/Navigo); ranks 11-500 are Ulta's brand directory, alphabetical.",
 }
 
 _HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"}
@@ -43,8 +44,8 @@ def _display(url):
 
 
 def _try_live():
-    """Best-effort live fetch from ulta.com. The site is JavaScript-rendered and
-    does not expose a ranking, so we return None and fall back to the cached
+    """Best-effort live fetch from ulta.com. The site is JavaScript-rendered, so
+    a server-side fetch returns no usable rows -> we fall back to the cached
     snapshot."""
     if requests is None:
         return None
@@ -64,14 +65,14 @@ def get_brands(live: bool = False):
         is_live = bool(live_rows)
     rows = []
     for r in DATA.TOP_BEAUTY_BRANDS:
-        website = _clean(r.get("website"))
+        ulta = _clean(r.get("ulta_url"))
         item = {
             "rank": r.get("rank"),
             "brand": _clean(r.get("brand")),
             "category": _clean(r.get("category")),
             "share": _clean(r.get("share")),
-            "website": website,
-            "website_display": _display(website),
+            "ulta_url": ulta,
+            "ulta_display": _display(ulta),
         }
         for field, _label in SOCIAL_FIELDS:
             item[field] = _clean(r.get(field))
@@ -93,7 +94,7 @@ def get_brands(live: bool = False):
 
 def columns():
     cols = [("Rank", "rank"), ("Brand", "brand"), ("Category", "category"),
-            ("Ulta.com Share", "share"), ("Website", "website")]
+            ("Ulta.com Share", "share"), ("Ulta Page", "ulta_url")]
     for field, label in SOCIAL_FIELDS:
         cols.append((label, field))
     cols.append(("Wikipedia", "wikipedia"))
