@@ -9,7 +9,7 @@ import io
 
 from flask import Flask, render_template, request, send_file, abort
 
-from tools import best_hospitals, best_colleges, premier_league, saudi_pro_league, twitch_streamers, wnba_teams, motorsports, beauty_brands, nfl_teams, racquet_sports, golf_tours, nba_teams, nhl_teams, mls_teams, nwsl_teams, mlb_teams, milb_teams, brasileirao, bundesliga, laliga
+from tools import best_hospitals, best_colleges, premier_league, saudi_pro_league, twitch_streamers, wnba_teams, motorsports, beauty_brands, nfl_teams, racquet_sports, golf_tours, nba_teams, nhl_teams, mls_teams, nwsl_teams, mlb_teams, milb_teams, brasileirao, bundesliga, laliga, serie_a, sp500, combat_sports, sporting_events, streaming_services
 
 app = Flask(__name__)
 
@@ -283,6 +283,67 @@ TOOLS = [
             "as CSV or Excel."
         ),
         "endpoint": "laliga_view",
+        "available": True,
+    },
+
+    {
+        "key": "serie-a",
+        "category": "Soccer",
+        "title": "Serie A",
+        "description": (
+            "Serie A clubs (2025-26 season). With official website and social handles (Facebook, "
+            "Instagram, X, YouTube, TikTok) plus Wikipedia. View and download "
+            "as CSV or Excel."
+        ),
+        "endpoint": "serie_a_view",
+        "available": True,
+    },
+    {
+        "key": "sp500",
+        "category": "Finance",
+        "title": "S&P 500",
+        "description": (
+            "S&P 500 index constituents (503 securities). With official website and social handles (Facebook, "
+            "Instagram, X, YouTube, TikTok) plus Wikipedia. View and download "
+            "as CSV or Excel."
+        ),
+        "endpoint": "sp500_view",
+        "available": True,
+    },
+    {
+        "key": "combat-sports",
+        "category": "Combat Sports",
+        "title": "Combat Sports",
+        "description": (
+            "Major combat sports and disciplines with their governing body. With official website and social handles (Facebook, "
+            "Instagram, X, YouTube, TikTok) plus Wikipedia. View and download "
+            "as CSV or Excel."
+        ),
+        "endpoint": "combat_sports_view",
+        "available": True,
+    },
+    {
+        "key": "sporting-events",
+        "category": "Sports Events",
+        "title": "Sporting Events",
+        "description": (
+            "The biggest global sporting events, ranked by popularity. With official website and social handles (Facebook, "
+            "Instagram, X, YouTube, TikTok) plus Wikipedia. View and download "
+            "as CSV or Excel."
+        ),
+        "endpoint": "sporting_events_view",
+        "available": True,
+    },
+    {
+        "key": "streaming-services",
+        "category": "Streaming",
+        "title": "Streaming Services",
+        "description": (
+            "Notable streaming media services (video, music, live, audio). With official website and social handles (Facebook, "
+            "Instagram, X, YouTube, TikTok) plus Wikipedia. View and download "
+            "as CSV or Excel."
+        ),
+        "endpoint": "streaming_services_view",
         "available": True,
     },
 ]
@@ -677,6 +738,96 @@ def laliga_export():
     if fmt == "xlsx":
         return _send_xlsx(laliga.columns(), rows, "LaLiga", base + ".xlsx")
     return _send_csv(laliga.to_csv(rows), base + ".csv")
+
+
+@app.route("/serie-a")
+def serie_a_view():
+    live = request.args.get("live") in ("1", "true", "yes")
+    rows, meta = serie_a.get_rows(live=live)
+    return render_template("serie-a.html", rows=rows, meta=meta)
+
+
+@app.route("/serie-a/export")
+def serie_a_export():
+    fmt = request.args.get("fmt", "csv")
+    rows, meta = serie_a.get_rows()
+    stamp = _dt.date.today().isoformat()
+    base = "serie_a_" + stamp
+    if fmt == "xlsx":
+        return _send_xlsx(serie_a.columns(), rows, "Serie A", base + ".xlsx")
+    return _send_csv(serie_a.to_csv(rows), base + ".csv")
+
+
+@app.route("/sp500")
+def sp500_view():
+    live = request.args.get("live") in ("1", "true", "yes")
+    rows, meta = sp500.get_rows(live=live)
+    return render_template("sp500.html", rows=rows, meta=meta)
+
+
+@app.route("/sp500/export")
+def sp500_export():
+    fmt = request.args.get("fmt", "csv")
+    rows, meta = sp500.get_rows()
+    stamp = _dt.date.today().isoformat()
+    base = "sp500_" + stamp
+    if fmt == "xlsx":
+        return _send_xlsx(sp500.columns(), rows, "S&P 500", base + ".xlsx")
+    return _send_csv(sp500.to_csv(rows), base + ".csv")
+
+
+@app.route("/combat-sports")
+def combat_sports_view():
+    live = request.args.get("live") in ("1", "true", "yes")
+    rows, meta = combat_sports.get_rows(live=live)
+    return render_template("combat-sports.html", rows=rows, meta=meta)
+
+
+@app.route("/combat-sports/export")
+def combat_sports_export():
+    fmt = request.args.get("fmt", "csv")
+    rows, meta = combat_sports.get_rows()
+    stamp = _dt.date.today().isoformat()
+    base = "combat_sports_" + stamp
+    if fmt == "xlsx":
+        return _send_xlsx(combat_sports.columns(), rows, "Combat Sports", base + ".xlsx")
+    return _send_csv(combat_sports.to_csv(rows), base + ".csv")
+
+
+@app.route("/sporting-events")
+def sporting_events_view():
+    live = request.args.get("live") in ("1", "true", "yes")
+    rows, meta = sporting_events.get_rows(live=live)
+    return render_template("sporting-events.html", rows=rows, meta=meta)
+
+
+@app.route("/sporting-events/export")
+def sporting_events_export():
+    fmt = request.args.get("fmt", "csv")
+    rows, meta = sporting_events.get_rows()
+    stamp = _dt.date.today().isoformat()
+    base = "sporting_events_" + stamp
+    if fmt == "xlsx":
+        return _send_xlsx(sporting_events.columns(), rows, "Sporting Events", base + ".xlsx")
+    return _send_csv(sporting_events.to_csv(rows), base + ".csv")
+
+
+@app.route("/streaming-services")
+def streaming_services_view():
+    live = request.args.get("live") in ("1", "true", "yes")
+    rows, meta = streaming_services.get_rows(live=live)
+    return render_template("streaming-services.html", rows=rows, meta=meta)
+
+
+@app.route("/streaming-services/export")
+def streaming_services_export():
+    fmt = request.args.get("fmt", "csv")
+    rows, meta = streaming_services.get_rows()
+    stamp = _dt.date.today().isoformat()
+    base = "streaming_services_" + stamp
+    if fmt == "xlsx":
+        return _send_xlsx(streaming_services.columns(), rows, "Streaming Services", base + ".xlsx")
+    return _send_csv(streaming_services.to_csv(rows), base + ".csv")
 
 
 # ---------------------------------------------------------------- Helpers
