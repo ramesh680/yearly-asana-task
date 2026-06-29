@@ -51,24 +51,26 @@
     </div>
 
     <!-- Tools Container -->
-    <div id="toolsContainer">
-      <div class="grid">
+    <section>
+      <h2>Choose a tool</h2>
+      <p class="muted">Available to the whole team. No login required.</p>
+      <div class="grid" id="toolsContainer">
         {% for tool in tools %}
-          <article
-            class="card tool-card"
-            data-category="{{ tool.category.lower() }}"
-            data-title="{{ tool.title.lower() }}"
-            data-description="{{ tool.description.lower() }}"
-          >
-            <span class="cat">{{ tool.category }}</span>
-            <h3>{{ tool.title }}</h3>
-            <p>{{ tool.description }}</p>
-            {% if tool.available %}
-              <a class="btn" href="{{ url_for(tool.endpoint) }}">Open {{ tool.title }}</a>
-            {% else %}
-              <span class="btn disabled">Coming soon</span>
-            {% endif %}
-          </article>
+        <article
+          class="card tool-card"
+          data-category="{{ tool.category.lower() }}"
+          data-title="{{ tool.title.lower() }}"
+          data-description="{{ tool.description.lower() }}"
+        >
+          <span class="cat">{{ tool.category }}</span>
+          <h3>{{ tool.title }}</h3>
+          <p>{{ tool.description }}</p>
+          {% if tool.available %}
+            <a class="btn" href="{{ url_for(tool.endpoint) }}">Open {{ tool.title }}</a>
+          {% else %}
+            <span class="btn disabled">Coming soon</span>
+          {% endif %}
+        </article>
         {% endfor %}
         <article class="card placeholder">
           <span class="cat">Add a tool</span>
@@ -76,7 +78,7 @@
           <p>This hub is set up to grow. Register a new tool in <code>TOOLS</code> in <code>app.py</code>, add a route and a template, and it appears here automatically.</p>
         </article>
       </div>
-    </div>
+    </section>
   </div>
 
   <script>
@@ -123,7 +125,7 @@
         }
       });
 
-      // Show empty state if no results
+      // Show/hide empty state
       const container = document.getElementById('toolsContainer');
       let emptyState = container.querySelector('.empty-state');
 
