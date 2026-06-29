@@ -9,7 +9,7 @@ import io
 
 from flask import Flask, render_template, request, send_file, abort
 
-from tools import best_hospitals, best_colleges, premier_league, saudi_pro_league, twitch_streamers, wnba_teams, motorsports, beauty_brands, nfl_teams, racquet_sports, golf_tours, nba_teams, nhl_teams, mls_teams, nwsl_teams, mlb_teams, milb_teams, brasileirao, bundesliga, laliga, serie_a, sp500, combat_sports, sporting_events, streaming_services, ligue1, vg_franchises, vg_platforms, vg_publishers, cpg_brands
+from tools import best_hospitals, best_colleges, premier_league, saudi_pro_league, twitch_streamers, wnba_teams, motorsports, beauty_brands, nfl_teams, racquet_sports, golf_tours, nba_teams, nhl_teams, mls_teams, nwsl_teams, mlb_teams, milb_teams, brasileirao, bundesliga, laliga, serie_a, sp500, combat_sports, sporting_events, streaming_services, ligue1, vg_franchises, vg_platforms, vg_publishers, cpg_brands, leagues_revenue
 
 app = Flask(__name__)
 
@@ -405,6 +405,19 @@ TOOLS = [
             "as CSV or Excel."
         ),
         "endpoint": "cpg_brands_view",
+        "available": True,
+    },
+
+    {
+        "key": "leagues-revenue",
+        "category": "Sports Business",
+        "title": "Sports Leagues by Revenue",
+        "description": (
+            "Professional sports leagues ranked by annual revenue (Wikipedia), "
+            "with official website and social handles (Facebook, Instagram, X, "
+            "YouTube, TikTok) plus Wikipedia. View and download as CSV or Excel."
+        ),
+        "endpoint": "leagues_revenue_view",
         "available": True,
     },
 ]
@@ -979,6 +992,24 @@ def cpg_brands_export():
     if fmt == "xlsx":
         return _send_xlsx(cpg_brands.columns(), rows, "CPG Brands", base + ".xlsx")
     return _send_csv(cpg_brands.to_csv(rows), base + ".csv")
+
+
+@app.route("/leagues-revenue")
+def leagues_revenue_view():
+    live = request.args.get("live") in ("1", "true", "yes")
+    rows, meta = leagues_revenue.get_rows(live=live)
+    return render_template("leagues-revenue.html", rows=rows, meta=meta)
+
+
+@app.route("/leagues-revenue/export")
+def leagues_revenue_export():
+    fmt = request.args.get("fmt", "csv")
+    rows, meta = leagues_revenue.get_rows()
+    stamp = _dt.date.today().isoformat()
+    base = "leagues_by_revenue_" + stamp
+    if fmt == "xlsx":
+        return _send_xlsx(leagues_revenue.columns(), rows, "Sports Leagues by Revenue", base + ".xlsx")
+    return _send_csv(leagues_revenue.to_csv(rows), base + ".csv")
 
 
 # ---------------------------------------------------------------- Helpers
