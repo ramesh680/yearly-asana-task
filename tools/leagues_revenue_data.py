@@ -6,7 +6,7 @@ Wikipedia links mapped where known, derived otherwise.
 Source: https://en.wikipedia.org/wiki/List_of_professional_sports_leagues_by_revenue
 """
 
-LEAGUEREV_EDITION = "Ranked by annual revenue"
+LEAGUEREV_EDITION = "Top 50 by annual revenue"
 LEAGUEREV_SOURCE_URL = "https://en.wikipedia.org/wiki/List_of_professional_sports_leagues_by_revenue"
 
 LEAGUES_BY_REVENUE = [
@@ -60,26 +60,4 @@ LEAGUES_BY_REVENUE = [
     {"rank": 76, "league": "Mexican Baseball League (Liga Mexicana de Béisbol; LMB)", "sport": "Baseball", "country": "Mexico", "website": "", "wikipedia": "https://en.wikipedia.org/wiki/Mexican_Baseball_League"},
     {"rank": 77, "league": "Liga I", "sport": "Association football", "country": "Romania", "website": "", "wikipedia": "https://en.wikipedia.org/wiki/Liga_I"},
     {"rank": 79, "league": "Chinese Professional Baseball League (CPBL)", "sport": "Baseball", "country": "Taiwan", "website": "", "wikipedia": "https://en.wikipedia.org/wiki/Chinese_Professional_Baseball_League"},
-    {"rank": 80, "league": "Campeonato Brasileiro Série B (Série B)", "sport": "Association football", "country": "Brazil", "website": "", "wikipedia": "https://en.wikipedia.org/wiki/Campeonato_Brasileiro_Série_B"},
-    {"rank": 82, "league": "Mexican Pacific League (Liga Mexicana del Pacífico; LMP)", "sport": "Baseball", "country": "Mexico", "website": "", "wikipedia": "https://en.wikipedia.org/wiki/Mexican_Pacific_League"},
-    {"rank": 83, "league": "Women's Premier League (cricket) (WPL)", "sport": "Twenty20 cricket", "country": "India", "website": "", "wikipedia": "https://en.wikipedia.org/wiki/Women's_Premier_League_(cricket)"},
-    {"rank": 84, "league": "Kazakhstan Premier League", "sport": "Association football", "country": "Kazakhstan", "website": "", "wikipedia": "https://en.wikipedia.org/wiki/Kazakhstan_Premier_League"},
-    {"rank": 91, "league": "Super League", "sport": "Rugby league football", "country": "England, France", "website": "", "wikipedia": "https://en.wikipedia.org/wiki/Super_League"},
-    {"rank": 92, "league": "Championnat National", "sport": "Association football", "country": "France", "website": "", "wikipedia": "https://en.wikipedia.org/wiki/Championnat_National"},
-    {"rank": 93, "league": "Women's Super League (WSL)", "sport": "Association football", "country": "England", "website": "", "wikipedia": "https://en.wikipedia.org/wiki/Women's_Super_League"},
-    {"rank": 94, "league": "Chilean Primera División", "sport": "Association football", "country": "Chile", "website": "", "wikipedia": "https://en.wikipedia.org/wiki/Chilean_Primera_División"},
-    {"rank": 95, "league": "Bangladesh Premier League (BPL)", "sport": "Twenty20 cricket", "country": "Bangladesh", "website": "", "wikipedia": "https://en.wikipedia.org/wiki/Bangladesh_Premier_League"},
-    {"rank": 96, "league": "South African Premiership", "sport": "Association football", "country": "South Africa", "website": "", "wikipedia": "https://en.wikipedia.org/wiki/South_African_Premiership"},
-    {"rank": 99, "league": "LNB Pro B", "sport": "Basketball", "country": "France", "website": "", "wikipedia": "https://en.wikipedia.org/wiki/LNB_Pro_B"},
-    {"rank": 100, "league": "I liga polska", "sport": "Association football", "country": "Poland", "website": "", "wikipedia": "https://en.wikipedia.org/wiki/I_liga_polska"},
-    {"rank": 101, "league": "National Basketball League (NBL)", "sport": "Basketball", "country": "Australia, New Zealand", "website": "", "wikipedia": "https://en.wikipedia.org/wiki/National_Basketball_League"},
-    {"rank": 102, "league": "Belarusian Premier League (Vyšejšaja Liha)", "sport": "Association football", "country": "Belarus", "website": "", "wikipedia": "https://en.wikipedia.org/wiki/Belarusian_Premier_League"},
-    {"rank": 104, "league": "Deutsche Eishockey Liga 2 (DEL2)", "sport": "Ice hockey", "country": "Germany", "website": "", "wikipedia": "https://en.wikipedia.org/wiki/Deutsche_Eishockey_Liga_2"},
-    {"rank": 105, "league": "Superettan", "sport": "Association football", "country": "Sweden", "website": "", "wikipedia": "https://en.wikipedia.org/wiki/Superettan"},
-    {"rank": 107, "league": "Lietuvos krepšinio lyga (LKL)", "sport": "Basketball", "country": "Lithuania", "website": "", "wikipedia": "https://en.wikipedia.org/wiki/Lietuvos_krepšinio_lyga"},
-    {"rank": 108, "league": "Veikkausliiga", "sport": "Association football", "country": "Finland", "website": "", "wikipedia": "https://en.wikipedia.org/wiki/Veikkausliiga"},
-    {"rank": 109, "league": "Pro Kabaddi League (PKL)", "sport": "Kabaddi", "country": "India", "website": "", "wikipedia": "https://en.wikipedia.org/wiki/Pro_Kabaddi_League"},
-    {"rank": 110, "league": "Latvian Higher League", "sport": "Association football", "country": "Latvia", "website": "", "wikipedia": "https://en.wikipedia.org/wiki/Latvian_Higher_League"},
-    {"rank": 114, "league": "Ekstraliga", "sport": "Speedway", "country": "Poland", "website": "", "wikipedia": "https://en.wikipedia.org/wiki/Ekstraliga"},
-    {"rank": 115, "league": "League of Ireland Premier Division", "sport": "Association football", "country": "Ireland, Northern Ireland", "website": "", "wikipedia": "https://en.wikipedia.org/wiki/League_of_Ireland_Premier_Division"},
 ]
