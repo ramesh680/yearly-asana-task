@@ -64,7 +64,9 @@ def _display(url):
 
 # ---------------------------------------------------------------- HTML parsing
 class _Tables(HTMLParser):
-    """Collect every <table> as a list of rows; each row is a list of cell texts."""
+    """Collect every <table> as a grid of cell texts, honouring rowspan/colspan
+    so values that span multiple rows (e.g. the 'Relegation' zone label) are
+    propagated to every cell they cover."""
     def __init__(self):
         super().__init__()
         self.tables = []
@@ -72,23 +74,51 @@ class _Tables(HTMLParser):
         self._row = None
         self._cell = None
         self._buf = []
+        self._span = 1
+        self._carry = {}   # col index -> [remaining_rows, text]
+        self._col = 0
 
     def handle_starttag(self, tag, attrs):
+        a = dict(attrs)
         if tag == "table":
-            self._t = []
+            self._t = []; self._carry = {}
         elif tag == "tr" and self._t is not None:
-            self._row = []
+            self._row = []; self._col = 0
         elif tag in ("td", "th") and self._row is not None:
-            self._cell = True
-            self._buf = []
+            # fill any carried-down (rowspan) cells occupying current columns first
+            while self._col in self._carry:
+                rem, txt = self._carry[self._col]
+                self._row.append(txt)
+                rem -= 1
+                if rem > 0: self._carry[self._col] = [rem, txt]
+                else: del self._carry[self._col]
+                self._col += 1
+            self._cell = True; self._buf = []
+            try: self._span = max(1, int(a.get("rowspan", "1")))
+            except Exception: self._span = 1
+            try: self._cspan = max(1, int(a.get("colspan", "1")))
+            except Exception: self._cspan = 1
 
     def handle_endtag(self, tag):
         if tag == "table" and self._t is not None:
             self.tables.append(self._t); self._t = None
         elif tag == "tr" and self._row is not None:
+            # trailing carried cells
+            while self._col in self._carry:
+                rem, txt = self._carry[self._col]
+                self._row.append(txt); rem -= 1
+                if rem > 0: self._carry[self._col] = [rem, txt]
+                else: del self._carry[self._col]
+                self._col += 1
             self._t.append(self._row); self._row = None
         elif tag in ("td", "th") and self._cell:
-            self._row.append("".join(self._buf).strip()); self._cell = False; self._buf = []
+            txt = "".join(self._buf).strip()
+            for _ in range(getattr(self, "_cspan", 1)):
+                self._row.append(txt)
+                if self._span > 1:
+                    self._carry[self._col] = [self._span - 1, txt]
+                self._col += 1
+            self._cell = False; self._buf = []
 
     def handle_data(self, data):
         if self._cell:
