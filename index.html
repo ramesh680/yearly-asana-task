@@ -48,34 +48,28 @@
       <button class="tab-btn" data-filter="finance" onclick="filterByCategory('finance')">Finance</button>
       <button class="tab-btn" data-filter="sports" onclick="filterByCategory('sports')">Sports</button>
       <button class="tab-btn" data-filter="streaming" onclick="filterByCategory('streaming')">Streaming</button>
+      <button class="tab-btn" data-filter="beauty" onclick="filterByCategory('beauty')">Beauty</button>
     </div>
 
     <!-- Tools Container -->
-    <section>
-      <h2>Choose a tool</h2>
-      <p class="muted">Available to the whole team. No login required.</p>
-      <div class="grid" id="toolsContainer">
+    <div id="toolsContainer">
+      <div class="grid">
         {% for tool in tools %}
-        <article
-          class="card tool-card"
-          data-category="{{ tool.category.lower() }}"
-          data-title="{{ tool.title.lower() }}"
-          data-description="{{ tool.description.lower() }}"
-        >
-          <span class="cat">{{ tool.category }}</span>
-          <h3>{{ tool.title }}</h3>
-          <p>{{ tool.description }}</p>
-          <div class="tool-meta">
-            {% if tool.get('count') %}
-              <span class="tool-count">{{ tool.count }} items</span>
+          <article
+            class="card tool-card"
+            data-category="{{ tool.category.lower() }}"
+            data-title="{{ tool.title.lower() }}"
+            data-description="{{ tool.description.lower() }}"
+          >
+            <span class="cat">{{ tool.category }}</span>
+            <h3>{{ tool.title }}</h3>
+            <p>{{ tool.description }}</p>
+            {% if tool.available %}
+              <a class="btn" href="{{ url_for(tool.endpoint) }}">Open {{ tool.title }}</a>
+            {% else %}
+              <span class="btn disabled">Coming soon</span>
             {% endif %}
-          </div>
-          {% if tool.available %}
-            <a class="btn" href="{{ url_for(tool.endpoint) }}">Open {{ tool.title }}</a>
-          {% else %}
-            <span class="btn disabled">Coming soon</span>
-          {% endif %}
-        </article>
+          </article>
         {% endfor %}
         <article class="card placeholder">
           <span class="cat">Add a tool</span>
@@ -83,27 +77,8 @@
           <p>This hub is set up to grow. Register a new tool in <code>TOOLS</code> in <code>app.py</code>, add a route and a template, and it appears here automatically.</p>
         </article>
       </div>
-    </section>
+    </div>
   </div>
-
-  <style>
-    .tool-meta {
-      font-size: 12px;
-      color: #999;
-      margin-top: 0.5rem;
-      padding-top: 0.5rem;
-      border-top: 1px solid #eee;
-    }
-
-    .tool-count {
-      display: inline-block;
-      background: #f0f0f0;
-      padding: 2px 8px;
-      border-radius: 4px;
-      font-weight: 500;
-      color: #666;
-    }
-  </style>
 
   <script>
     let currentFilter = 'all';
@@ -149,7 +124,7 @@
         }
       });
 
-      // Show/hide empty state
+      // Show empty state if no results
       const container = document.getElementById('toolsContainer');
       let emptyState = container.querySelector('.empty-state');
 
