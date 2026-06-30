@@ -3,7 +3,7 @@
 {% block content %}
   <p class="crumbs"><a href="{{ url_for('index') }}">&larr; All tools</a></p>
 
-  <section class="hero">
+  <section class="hero">{% if current_section %}<span class="section-chip">{{ current_section }}</span>{% endif %}
     <h1>Best Hospitals (US)</h1>
     <p class="lede">The latest U.S. best-hospital lists, with official website, social accounts, and Wikipedia page. Switch sources, then download as CSV or Excel.</p>
   </section>

@@ -48,34 +48,39 @@
       <button class="tab-btn" data-filter="finance" onclick="filterByCategory('finance')">Finance</button>
       <button class="tab-btn" data-filter="sports" onclick="filterByCategory('sports')">Sports</button>
       <button class="tab-btn" data-filter="streaming" onclick="filterByCategory('streaming')">Streaming</button>
+      <button class="tab-btn" data-filter="beauty" onclick="filterByCategory('beauty')">Beauty</button>
     </div>
 
-    <!-- Tools Container -->
+    <!-- Tools Container (grouped by section) -->
     <div id="toolsContainer">
-      <div class="grid">
-        {% for tool in tools %}
-          <article
-            class="card tool-card"
-            data-category="{{ tool.category.lower() }}"
-            data-title="{{ tool.title.lower() }}"
-            data-description="{{ tool.description.lower() }}"
-          >
-            <span class="cat">{{ tool.category }}</span>
-            <h3>{{ tool.title }}</h3>
-            <p>{{ tool.description }}</p>
-            {% if tool.available %}
-              <a class="btn" href="{{ url_for(tool.endpoint) }}">Open {{ tool.title }}</a>
-            {% else %}
-              <span class="btn disabled">Coming soon</span>
-            {% endif %}
-          </article>
-        {% endfor %}
-        <article class="card placeholder">
-          <span class="cat">Add a tool</span>
-          <h3>More tools coming</h3>
-          <p>This hub is set up to grow. Register a new tool in <code>TOOLS</code> in <code>app.py</code>, add a route and a template, and it appears here automatically.</p>
-        </article>
-      </div>
+      {% set cats = ['Healthcare', 'Education', 'Finance', 'Sports', 'Streaming', 'Beauty'] %}
+      {% for cat in cats %}
+        {% set cat_tools = tools | selectattr('category', 'equalto', cat) | list %}
+        {% if cat_tools %}
+          <section class="category-section" data-category="{{ cat.lower() }}">
+            <h2 class="category-header">{{ cat }}</h2>
+            <div class="grid">
+              {% for tool in cat_tools %}
+                <article
+                  class="card tool-card"
+                  data-category="{{ tool.category.lower() }}"
+                  data-title="{{ tool.title.lower() }}"
+                  data-description="{{ tool.description.lower() }}"
+                >
+                  <span class="cat">{{ tool.category }}</span>
+                  <h3>{{ tool.title }}</h3>
+                  <p>{{ tool.description }}</p>
+                  {% if tool.available %}
+                    <a class="btn" href="{{ url_for(tool.endpoint) }}">Open {{ tool.title }}</a>
+                  {% else %}
+                    <span class="btn disabled">Coming soon</span>
+                  {% endif %}
+                </article>
+              {% endfor %}
+            </div>
+          </section>
+        {% endif %}
+      {% endfor %}
     </div>
   </div>
 
@@ -84,14 +89,8 @@
 
     function filterByCategory(category) {
       currentFilter = category;
-
-      // Update active tab
-      document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.remove('active');
-      });
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
       document.querySelector(`[data-filter="${category}"]`).classList.add('active');
-
-      // Filter tools
       applyFilters();
     }
 
@@ -101,33 +100,42 @@
 
     function applyFilters() {
       const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-      const toolCards = document.querySelectorAll('.tool-card');
-      let visibleCount = 0;
+      const sections = document.querySelectorAll('.category-section');
+      let totalVisible = 0;
 
-      toolCards.forEach(card => {
-        const category = card.dataset.category;
-        const title = card.dataset.title;
-        const description = card.dataset.description;
+      sections.forEach(section => {
+        const cards = section.querySelectorAll('.tool-card');
+        let sectionVisible = 0;
 
-        const categoryMatch = currentFilter === 'all' || category === currentFilter;
-        const searchMatch =
-          searchTerm === '' ||
-          title.includes(searchTerm) ||
-          description.includes(searchTerm);
+        cards.forEach(card => {
+          const category = card.dataset.category;
+          const title = card.dataset.title || '';
+          const description = card.dataset.description || '';
 
-        if (categoryMatch && searchMatch) {
-          card.style.display = 'block';
-          visibleCount++;
-        } else {
-          card.style.display = 'none';
-        }
+          const categoryMatch = currentFilter === 'all' || category === currentFilter;
+          const searchMatch =
+            searchTerm === '' ||
+            title.includes(searchTerm) ||
+            description.includes(searchTerm);
+
+          if (categoryMatch && searchMatch) {
+            card.style.display = '';
+            sectionVisible++;
+          } else {
+            card.style.display = 'none';
+          }
+        });
+
+        // Hide the whole section (header included) when it has no visible cards
+        section.style.display = sectionVisible > 0 ? 'block' : 'none';
+        totalVisible += sectionVisible;
       });
 
-      // Show empty state if no results
+      // Empty state
       const container = document.getElementById('toolsContainer');
       let emptyState = container.querySelector('.empty-state');
 
-      if (visibleCount === 0) {
+      if (totalVisible === 0) {
         if (!emptyState) {
           emptyState = document.createElement('div');
           emptyState.className = 'empty-state';
@@ -138,10 +146,8 @@
           container.appendChild(emptyState);
         }
         emptyState.style.display = 'block';
-      } else {
-        if (emptyState) {
-          emptyState.style.display = 'none';
-        }
+      } else if (emptyState) {
+        emptyState.style.display = 'none';
       }
     }
   </script>

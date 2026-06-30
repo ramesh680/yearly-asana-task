@@ -3,7 +3,7 @@
 {% block content %}
   <p class="crumbs"><a href="{{ url_for('index') }}">&larr; All tools</a></p>
 
-  <section class="hero">
+  <section class="hero">{% if current_section %}<span class="section-chip">{{ current_section }}</span>{% endif %}
     <h1>Top Motorsports</h1>
     <p class="lede">The most popular motorsport series and events, with discipline, official website, social accounts, and Wikipedia page. Download as CSV or Excel.</p>
   </section>

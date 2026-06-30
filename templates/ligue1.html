@@ -2,7 +2,7 @@
 {% block title %}Ligue 1 · {{ app_name }}{% endblock %}
 {% block content %}
   <p class="crumbs"><a href="{{ url_for('index') }}">&larr; All tools</a></p>
-  <section class="hero"><h1>Ligue 1</h1>
+  <section class="hero">{% if current_section %}<span class="section-chip">{{ current_section }}</span>{% endif %}<h1>Ligue 1</h1>
   <p class="lede">Ligue 1 clubs (2025-26 season). With official website and social accounts (Facebook, Instagram, X, YouTube, TikTok) plus Wikipedia. Download as CSV or Excel.</p></section>
   <div class="meta-bar"><span class="badge cached">Cached snapshot</span>
     <span>{{ meta.count }} &middot; {{ meta.edition }}</span>

@@ -2,7 +2,7 @@
 {% block title %}Golf Tours · {{ app_name }}{% endblock %}
 {% block content %}
   <p class="crumbs"><a href="{{ url_for('index') }}">&larr; All tools</a></p>
-  <section class="hero"><h1>Golf Tours</h1>
+  <section class="hero">{% if current_section %}<span class="section-chip">{{ current_section }}</span>{% endif %}<h1>Golf Tours</h1>
   <p class="lede">Major professional golf tours and circuits. With official website and social accounts (Facebook, Instagram, X, YouTube, TikTok) plus Wikipedia. Download as CSV or Excel.</p></section>
   <div class="meta-bar">
     <span class="badge cached">Cached snapshot</span>

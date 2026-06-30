@@ -3,7 +3,7 @@
 {% block content %}
   <p class="crumbs"><a href="{{ url_for('index') }}">&larr; All tools</a></p>
 
-  <section class="hero">
+  <section class="hero">{% if current_section %}<span class="section-chip">{{ current_section }}</span>{% endif %}
     <h1>Top Beauty Brands</h1>
     <p class="lede">500 beauty brands from Ulta.com. The top 10 are ranked by 2025 online sales share; the rest are Ulta's alphabetical brand directory, each linking to its official Ulta page. Download as CSV or Excel.</p>
   </section>

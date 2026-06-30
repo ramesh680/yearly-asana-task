@@ -221,7 +221,18 @@ TOOLS = [{'title': 'Best Hospitals (US)',
 
 @app.context_processor
 def inject_globals():
-    return {"app_name": APP_NAME, "today": _dt.date.today().isoformat()}
+    section = None
+    ep = request.endpoint
+    if ep:
+        for _t in TOOLS:
+            if _t.get("endpoint") == ep:
+                section = _t.get("category")
+                break
+    return {
+        "app_name": APP_NAME,
+        "today": _dt.date.today().isoformat(),
+        "current_section": section,
+    }
 
 
 @app.route("/")

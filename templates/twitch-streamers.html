@@ -3,7 +3,7 @@
 {% block content %}
   <p class="crumbs"><a href="{{ url_for('index') }}">&larr; All tools</a></p>
 
-  <section class="hero">
+  <section class="hero">{% if current_section %}<span class="section-chip">{{ current_section }}</span>{% endif %}
     <h1>Top Twitch Streamers</h1>
     <p class="lede">TwitchTracker's overall channel ranking, with each channel's 30-day average viewers, all-time peak, hours watched, Twitch link, socials, and Wikipedia page. Download as CSV or Excel.</p>
   </section>

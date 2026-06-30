@@ -3,7 +3,7 @@
 {% block content %}
   <p class="crumbs"><a href="{{ url_for('index') }}">&larr; All tools</a></p>
 
-  <section class="hero">
+  <section class="hero">{% if current_section %}<span class="section-chip">{{ current_section }}</span>{% endif %}
     <h1>WNBA Teams</h1>
     <p class="lede">The {{ meta.edition }} Women's National Basketball Association teams, ordered by final regular-season standing, with home city, arena, record, official website, social accounts, and Wikipedia page. Download as CSV or Excel.</p>
   </section>

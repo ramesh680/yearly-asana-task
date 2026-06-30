@@ -2,7 +2,7 @@
 {% block title %}Video Game Publishers · {{ app_name }}{% endblock %}
 {% block content %}
   <p class="crumbs"><a href="{{ url_for('index') }}">&larr; All tools</a></p>
-  <section class="hero"><h1>Video Game Publishers</h1>
+  <section class="hero">{% if current_section %}<span class="section-chip">{{ current_section }}</span>{% endif %}<h1>Video Game Publishers</h1>
   <p class="lede">Major video game publishers. With official website and social accounts (Facebook, Instagram, X, YouTube, TikTok) plus Wikipedia. Download as CSV or Excel.</p></section>
   <div class="meta-bar"><span class="badge cached">Cached snapshot</span>
     <span>{{ meta.count }} &middot; {{ meta.edition }}</span>
