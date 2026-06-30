@@ -9,7 +9,7 @@ import io
 
 from flask import Flask, render_template, request, send_file, abort
 
-from tools import best_hospitals, best_colleges, premier_league, saudi_pro_league, twitch_streamers, wnba_teams, motorsports, beauty_brands, nfl_teams, racquet_sports, golf_tours, nba_teams, nhl_teams, mls_teams, nwsl_teams, mlb_teams, milb_teams, brasileirao, bundesliga, laliga, serie_a, sp500, combat_sports, sporting_events, streaming_services, ligue1, vg_franchises, vg_platforms, vg_publishers, cpg_brands, leagues_revenue
+from tools import best_hospitals, best_colleges, premier_league, saudi_pro_league, twitch_streamers, wnba_teams, motorsports, beauty_brands, nfl_teams, racquet_sports, golf_tours, nba_teams, nhl_teams, mls_teams, nwsl_teams, mlb_teams, milb_teams, brasileirao, bundesliga, laliga, serie_a, sp500, combat_sports, sporting_events, streaming_services, ligue1, vg_franchises, vg_platforms, vg_publishers, cpg_brands, leagues_revenue, insurance
 
 app = Flask(__name__)
 
@@ -216,7 +216,14 @@ TOOLS = [{'title': 'Best Hospitals (US)',
                  'pages and social handles.',
   'endpoint': 'beauty_brands_view',
   'available': True,
-  'count': 5000}]
+  'count': 5000},
+ {'title': 'Best Car Insurance Companies',
+  'category': 'Insurance',
+  'description': 'Top U.S. car insurance companies as rated by U.S. News & World Report (Travelers '
+                 'rated Best Overall), with official website and social handles.',
+  'endpoint': 'insurance_view',
+  'available': True,
+  'count': 12}]
 
 
 @app.context_processor
@@ -817,6 +824,24 @@ def leagues_revenue_export():
     if fmt == "xlsx":
         return _send_xlsx(leagues_revenue.columns(), rows, "Sports Leagues by Revenue", base + ".xlsx")
     return _send_csv(leagues_revenue.to_csv(rows), base + ".csv")
+
+
+@app.route("/car-insurance")
+def insurance_view():
+    live = request.args.get("live") in ("1", "true", "yes")
+    rows, meta = insurance.get_rows(live=live)
+    return render_template("car-insurance.html", rows=rows, meta=meta)
+
+
+@app.route("/car-insurance/export")
+def insurance_export():
+    fmt = request.args.get("fmt", "csv")
+    rows, meta = insurance.get_rows()
+    stamp = _dt.date.today().isoformat()
+    base = "best_car_insurance_companies_" + stamp
+    if fmt == "xlsx":
+        return _send_xlsx(insurance.columns(), rows, "Car Insurance Companies", base + ".xlsx")
+    return _send_csv(insurance.to_csv(rows), base + ".csv")
 
 
 # ---------------------------------------------------------------- Helpers
