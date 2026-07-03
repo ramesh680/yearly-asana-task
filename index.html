@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yearly Data &amp; Tools Platform</title>
+    <title>{{ app_name|default('Yearly Data & Tools Platform') }}</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
     <style>
         :root{
             --bg:#0b0d17; --bg2:#0e1120; --card:rgba(255,255,255,.05); --card-brd:rgba(255,255,255,.09);
             --text:#eef1f7; --muted:#9aa3b2; --faint:#6b7385;
             --brand1:#7c5cff; --brand2:#22d3ee; --brand3:#f472b6;
-            --ok:#34d399; --err:#fb7185; --radius:18px; --radius-sm:12px;
+            --ok:#34d399; --radius:18px; --radius-sm:12px;
         }
         *{margin:0;padding:0;box-sizing:border-box}
         html{scroll-behavior:smooth}
@@ -53,7 +53,7 @@
         .tool .go{margin-top:16px;font-size:.82rem;font-weight:600;color:var(--brand1);display:inline-flex;align-items:center;gap:6px}
         .tool:hover .go{color:var(--brand2)}
         .count{text-align:center;color:var(--faint);font-size:.82rem;margin-top:18px}
-        .empty{text-align:center;color:var(--faint);padding:50px 0;grid-column:1/-1}
+        .empty{text-align:center;color:var(--faint);padding:50px 0;grid-column:1/-1;display:none}
         .footer{text-align:center;color:var(--faint);margin-top:46px;padding:22px;font-size:.85rem}
         .footer .grad{background:linear-gradient(100deg,var(--brand1),var(--brand3));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;font-weight:600}
         @media(max-width:640px){.nav-links .nav-pill:first-child{display:none}}
@@ -85,75 +85,58 @@
                 <span class="mag">🔍</span>
                 <input id="searchInput" type="text" placeholder="Search tools by name or description…" oninput="applyFilters()">
             </div>
-            <div class="cats" id="cats"></div>
+            <div class="cats" id="cats">
+                {% set ns = namespace(cats=[]) %}
+                {% for t in tools %}{% if t.category not in ns.cats %}{% set ns.cats = ns.cats + [t.category] %}{% endif %}{% endfor %}
+                <button class="cat-btn active" data-cat="all" onclick="setCat(this,'all')">All Tools</button>
+                {% for c in ns.cats %}
+                <button class="cat-btn" data-cat="{{ c|lower }}" onclick="setCat(this,'{{ c|lower }}')">{{ c }}</button>
+                {% endfor %}
+            </div>
         </div>
 
-        <div class="grid" id="grid"></div>
+        <div class="grid" id="grid">
+            {% for t in tools %}
+            <a class="tool" href="{{ url_for(t.endpoint) if t.available else '#' }}"
+               data-category="{{ t.category|lower }}"
+               data-search="{{ (t.title ~ ' ' ~ t.description)|lower }}">
+                <span class="badge">{{ t.category }}</span>
+                <h3>{{ t.title }}</h3>
+                <p>{{ t.description }}</p>
+                <span class="go">Open tool →</span>
+            </a>
+            {% endfor %}
+            <div class="empty" id="empty">No tools match your search.</div>
+        </div>
         <div class="count" id="count"></div>
 
         <footer class="footer">🚀 Powered by <span class="grad">Ramesh Goswami</span> · Automation at Scale</footer>
     </div>
 
     <script>
-        const TOOLS = [
-            {c:"healthcare", t:"Best Hospitals (US)", h:"/best-hospitals", d:"Latest U.S. best-hospital lists from U.S. News & World Report and Newsweek/Statista, with each hospital's official website and social handles."},
-            {c:"education", t:"Best Colleges (US)", h:"/best-colleges", d:"U.S. News Best National Universities (Top 100, 2026), with each school's official website and social handles."},
-            {c:"finance", t:"Russell 3000", h:"/russell-3000", d:"All Russell 3000 constituents ranked by index weight with official data."},
-            {c:"finance", t:"S&P 500", h:"/sp500", d:"Standard & Poor's 500 index companies with detailed financial metrics and social handles."},
-            {c:"finance", t:"CPG Brand Search", h:"/cpg-brands", d:"Consumer packaged goods brands with market data and social handles."},
-            {c:"insurance", t:"Best Car Insurance Companies", h:"/car-insurance", d:"Top U.S. car insurance companies as rated by U.S. News & World Report, with official sites and social handles."},
-            {c:"sports", t:"Golf Brand Discovery", h:"/golf-tours", d:"Major golf tours and brands with official websites and social handles."},
-            {c:"sports", t:"National Basketball Association", h:"/nba-teams", d:"All NBA teams with official websites and social handles."},
-            {c:"sports", t:"National Hockey League", h:"/nhl-teams", d:"All NHL teams with official websites and social handles."},
-            {c:"sports", t:"Major League Soccer", h:"/mls-teams", d:"All MLS clubs with official websites and social handles."},
-            {c:"sports", t:"National Women's Soccer League", h:"/nwsl-teams", d:"All NWSL clubs with official websites and social handles."},
-            {c:"sports", t:"Major League Baseball", h:"/mlb-teams", d:"All MLB teams with official websites and social handles."},
-            {c:"sports", t:"Minor League Baseball", h:"/milb-teams", d:"Minor League Baseball teams with official websites and social handles."},
-            {c:"sports", t:"Brasileiro Série A", h:"/brasileirao", d:"Brazilian Série A clubs with official websites and social handles."},
-            {c:"sports", t:"Bundesliga", h:"/bundesliga", d:"German Bundesliga clubs with official websites and social handles."},
-            {c:"sports", t:"LaLiga", h:"/laliga", d:"Spanish LaLiga clubs with official websites and social handles."},
-            {c:"sports", t:"Ligue 1", h:"/ligue1", d:"French Ligue 1 clubs with official websites and social handles."},
-            {c:"sports", t:"Serie A", h:"/serie-a", d:"Italian Serie A clubs with official websites and social handles."},
-            {c:"sports", t:"Combat Sports", h:"/combat-sports", d:"Major combat-sports promotions with official websites and social handles."},
-            {c:"sports", t:"Sporting Events Brand Discovery", h:"/sporting-events", d:"Major sporting events with official websites and social handles."},
-            {c:"sports", t:"Sports Leagues by Revenue", h:"/leagues-revenue", d:"Top sports leagues ranked by revenue with official data."},
-            {c:"sports", t:"English Premier League", h:"/premier-league", d:"All Premier League clubs with official websites and social handles."},
-            {c:"sports", t:"Saudi Pro League", h:"/saudi-pro-league", d:"Saudi Pro League clubs with official websites and social handles."},
-            {c:"sports", t:"WNBA Teams", h:"/wnba-teams", d:"All WNBA teams with official websites and social handles."},
-            {c:"sports", t:"Top Motorsports", h:"/motorsports", d:"Top motorsports series with official websites and social handles."},
-            {c:"sports", t:"National Football League", h:"/nfl-teams", d:"All NFL teams with official websites and social handles."},
-            {c:"sports", t:"Racquet Sports", h:"/racquet-sports", d:"Major racquet-sports tours with official websites and social handles."},
-            {c:"streaming", t:"Streaming Services Brand Discovery", h:"/streaming-services", d:"Streaming services with official websites and social handles."},
-            {c:"streaming", t:"Top Twitch Streamers", h:"/twitch-streamers", d:"Top Twitch streamers with channels and social handles."},
-            {c:"streaming", t:"Video Game Franchises Brand Discovery", h:"/vg-franchises", d:"Major video game franchises with official websites and social handles."},
-            {c:"streaming", t:"Video Game Platforms Brand Discovery", h:"/vg-platforms", d:"Video game platforms with official websites and social handles."},
-            {c:"streaming", t:"Video Game Publishers Brand Discovery", h:"/vg-publishers", d:"Video game publishers with official websites and social handles."},
-            {c:"beauty", t:"Top Beauty Brands", h:"/beauty-brands", d:"Top beauty brands with official websites and social handles."}
-        ];
-        const CATS = [["all","All Tools"],["healthcare","Healthcare"],["education","Education"],["finance","Finance"],["insurance","Insurance"],["sports","Sports"],["streaming","Streaming"],["beauty","Beauty"]];
         let activeCat = "all";
+        const cards = Array.from(document.querySelectorAll('.tool'));
 
-        function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-        function labelFor(c){const m=CATS.find(x=>x[0]===c);return m?m[1]:c;}
-
-        function renderCats(){
-            document.getElementById('cats').innerHTML = CATS.map(([id,label])=>
-                `<button class="cat-btn${id===activeCat?' active':''}" onclick="setCat('${id}')">${label}</button>`).join('');
+        function setCat(btn, cat){
+            activeCat = cat;
+            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            applyFilters();
         }
-        function setCat(id){activeCat=id;renderCats();applyFilters();}
-
         function applyFilters(){
-            const q=(document.getElementById('searchInput').value||'').toLowerCase().trim();
-            const list=TOOLS.filter(t=>(activeCat==='all'||t.c===activeCat) &&
-                (!q || t.t.toLowerCase().includes(q) || t.d.toLowerCase().includes(q)));
-            const grid=document.getElementById('grid');
-            grid.innerHTML = list.length ? list.map(t=>
-                `<a class="tool" href="${t.h}"><span class="badge">${esc(labelFor(t.c))}</span>`
-                +`<h3>${esc(t.t)}</h3><p>${esc(t.d)}</p><span class="go">Open tool →</span></a>`).join('')
-                : '<div class="empty">No tools match your search.</div>';
-            document.getElementById('count').textContent = list.length+' of '+TOOLS.length+' tools';
+            const q = (document.getElementById('searchInput').value || '').toLowerCase().trim();
+            let shown = 0;
+            cards.forEach(c => {
+                const okCat = activeCat === 'all' || c.dataset.category === activeCat;
+                const okSearch = !q || (c.dataset.search || '').includes(q);
+                const show = okCat && okSearch;
+                c.style.display = show ? 'flex' : 'none';
+                if (show) shown++;
+            });
+            document.getElementById('empty').style.display = shown ? 'none' : 'block';
+            document.getElementById('count').textContent = shown + ' of ' + cards.length + ' tools';
         }
-        renderCats(); applyFilters();
+        applyFilters();
     </script>
 </body>
 </html>
