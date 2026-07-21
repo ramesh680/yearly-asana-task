@@ -9,7 +9,7 @@ import io
 
 from flask import Flask, render_template, request, send_file, abort
 
-from tools import best_hospitals, best_colleges, premier_league, saudi_pro_league, twitch_streamers, wnba_teams, motorsports, beauty_brands, nfl_teams, racquet_sports, golf_tours, nba_teams, nhl_teams, mls_teams, nwsl_teams, mlb_teams, milb_teams, brasileirao, bundesliga, laliga, serie_a, sp500, combat_sports, sporting_events, streaming_services, ligue1, vg_franchises, vg_platforms, vg_publishers, cpg_brands, leagues_revenue, insurance, sephora_brands
+from tools import best_hospitals, best_colleges, premier_league, saudi_pro_league, twitch_streamers, wnba_teams, motorsports, beauty_brands, nfl_teams, racquet_sports, golf_tours, nba_teams, nhl_teams, mls_teams, nwsl_teams, mlb_teams, milb_teams, brasileirao, bundesliga, laliga, serie_a, sp500, combat_sports, sporting_events, streaming_services, ligue1, vg_franchises, vg_platforms, vg_publishers, cpg_brands, leagues_revenue, insurance, sephora_brands, ulta_brands
 
 app = Flask(__name__)
 
@@ -223,6 +223,12 @@ TOOLS = [{'title': 'Best Hospitals (US)',
   'endpoint': 'sephora_brands_view',
   'available': True,
   'count': 347},
+ {'title': 'Ulta Brands',
+  'category': 'Beauty',
+  'description': "Ulta's full A-Z brand directory (ulta.com/brand/all), each with its official Ulta page and social handles.",
+  'endpoint': 'ulta_brands_view',
+  'available': True,
+  'count': 1046},
  {'title': 'Best Car Insurance Companies',
   'category': 'Insurance',
   'description': 'Top U.S. car insurance companies as rated by U.S. News & World Report (Travelers '
@@ -430,6 +436,22 @@ def sephora_brands_export():
     if fmt == "xlsx":
         return _send_xlsx(sephora_brands.columns(), rows, "Sephora Brands", base + ".xlsx")
     return _send_csv(sephora_brands.to_csv(rows), base + ".csv")
+
+@app.route("/ulta-brands")
+def ulta_brands_view():
+    live = request.args.get("live") in ("1", "true", "yes")
+    rows, meta = ulta_brands.get_brands(live=live)
+    return render_template("ulta-brands.html", rows=rows, meta=meta)
+
+@app.route("/ulta-brands/export")
+def ulta_brands_export():
+    fmt = request.args.get("fmt", "csv")
+    rows, meta = ulta_brands.get_brands()
+    stamp = _dt.date.today().isoformat()
+    base = "ulta_brands_{}".format(stamp)
+    if fmt == "xlsx":
+        return _send_xlsx(ulta_brands.columns(), rows, "Ulta Brands", base + ".xlsx")
+    return _send_csv(ulta_brands.to_csv(rows), base + ".csv")
 
 
 # ----------------------------------------------------------- National Football League
