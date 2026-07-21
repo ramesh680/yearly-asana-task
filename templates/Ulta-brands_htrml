@@ -1,0 +1,242 @@
+{% extends "base.html" %}
+
+{% block title %}Ulta Brands - Yearly Asana Task{% endblock %}
+
+{% block content %}
+<main>
+  <a href="/">← All tools</a>
+  
+  <section>
+    <span class="category">{{ current_section }}</span>
+    <h1>Ulta Brands</h1>
+    <p>Ulta's full A–Z brand directory (ulta.com/brand/all), each linking to its official Ulta brand page with social handles. Download as CSV or Excel.</p>
+  </section>
+
+  <section class="meta">
+    <span class="label">Cached snapshot</span>
+    <strong>{{ meta.count }} brands</strong> · {{ meta.edition }}
+    <a href="{{ meta.source }}" target="_blank" class="source-link">Source ↗</a>
+  </section>
+
+  <section class="notes">
+    <strong>Note:</strong> Full A-Z Ulta brand directory. Brand pages link to Ulta. Facebook/Instagram/X/YouTube/TikTok handles are auto-generated from the brand name and unverified, except select prominent brands.
+  </section>
+
+  <section class="export-buttons">
+    <a href="/ulta-brands/export?fmt=csv" class="btn-export">Download CSV</a>
+    <a href="/ulta-brands/export?fmt=xlsx" class="btn-export">Download Excel</a>
+  </section>
+
+  <section class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Brand</th>
+          <th>Ulta Page</th>
+          <th>Facebook</th>
+          <th>Instagram</th>
+          <th>X / Twitter</th>
+          <th>YouTube</th>
+          <th>TikTok</th>
+          <th>Wikipedia</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in rows %}
+        <tr>
+          <td>{{ row.rank }}</td>
+          <td>{{ row.brand }}</td>
+          <td><a href="{{ row.ulta_url }}" target="_blank">ulta.com/brand/{{ row.ulta_url.split('/')[-1] }}</a></td>
+          <td>
+            {% if row.get('facebook') %}
+              <a href="{{ row.facebook }}" target="_blank">Link</a>
+            {% else %}
+              —
+            {% endif %}
+          </td>
+          <td>
+            {% if row.get('instagram') %}
+              <a href="{{ row.instagram }}" target="_blank">Link</a>
+            {% else %}
+              —
+            {% endif %}
+          </td>
+          <td>
+            {% if row.get('twitter') %}
+              <a href="{{ row.twitter }}" target="_blank">Link</a>
+            {% else %}
+              —
+            {% endif %}
+          </td>
+          <td>
+            {% if row.get('youtube') %}
+              <a href="{{ row.youtube }}" target="_blank">Link</a>
+            {% else %}
+              —
+            {% endif %}
+          </td>
+          <td>
+            {% if row.get('tiktok') %}
+              <a href="{{ row.tiktok }}" target="_blank">Link</a>
+            {% else %}
+              —
+            {% endif %}
+          </td>
+          <td>
+            {% if row.get('wikipedia') %}
+              <a href="{{ row.wikipedia }}" target="_blank">Link</a>
+            {% else %}
+              —
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+</main>
+
+<style>
+  main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  a {
+    color: #0969da;
+    text-decoration: none;
+  }
+
+  a:hover {
+    text-decoration: underline;
+  }
+
+  section {
+    margin-bottom: 2rem;
+  }
+
+  .category {
+    font-size: 0.875rem;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  h1 {
+    margin: 0.5rem 0 1rem 0;
+    font-size: 2rem;
+    font-weight: 600;
+  }
+
+  p {
+    margin: 0;
+    color: #555;
+    line-height: 1.5;
+  }
+
+  .meta {
+    font-size: 0.9rem;
+    color: #666;
+  }
+
+  .meta strong {
+    color: #111;
+  }
+
+  .source-link {
+    margin-left: 1rem;
+  }
+
+  .notes {
+    background: #f5f5f5;
+    padding: 1rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+
+  .export-buttons {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .btn-export {
+    padding: 0.5rem 1rem;
+    background: #0969da;
+    color: white;
+    border-radius: 4px;
+    font-weight: 500;
+    display: inline-block;
+  }
+
+  .btn-export:hover {
+    background: #0860ca;
+    text-decoration: none;
+  }
+
+  .table-container {
+    overflow-x: auto;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+  }
+
+  thead {
+    background: #f5f5f5;
+    font-weight: 600;
+  }
+
+  th, td {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid #e5e5e5;
+  }
+
+  th {
+    position: sticky;
+    top: 0;
+    background: #f5f5f5;
+  }
+
+  tbody tr:hover {
+    background: #fafafa;
+  }
+
+  td {
+    color: #111;
+  }
+
+  tbody tr:nth-child(even) {
+    background: #fafafa;
+  }
+
+  tbody tr:nth-child(even):hover {
+    background: #f0f0f0;
+  }
+
+  a[target="_blank"] {
+    color: #0969da;
+  }
+
+  td:first-child {
+    width: 5%;
+    text-align: center;
+    color: #666;
+  }
+
+  td:nth-child(2) {
+    width: 20%;
+    font-weight: 500;
+  }
+
+  td:nth-child(3) {
+    width: 20%;
+  }
+</style>
+{% endblock %}
