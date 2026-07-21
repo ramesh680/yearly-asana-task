@@ -9,7 +9,7 @@ import io
 
 from flask import Flask, render_template, request, send_file, abort
 
-from tools import best_hospitals, best_colleges, premier_league, saudi_pro_league, twitch_streamers, wnba_teams, motorsports, beauty_brands, nfl_teams, racquet_sports, golf_tours, nba_teams, nhl_teams, mls_teams, nwsl_teams, mlb_teams, milb_teams, brasileirao, bundesliga, laliga, serie_a, sp500, combat_sports, sporting_events, streaming_services, ligue1, vg_franchises, vg_platforms, vg_publishers, cpg_brands, leagues_revenue, insurance
+from tools import best_hospitals, best_colleges, premier_league, saudi_pro_league, twitch_streamers, wnba_teams, motorsports, beauty_brands, nfl_teams, racquet_sports, golf_tours, nba_teams, nhl_teams, mls_teams, nwsl_teams, mlb_teams, milb_teams, brasileirao, bundesliga, laliga, serie_a, sp500, combat_sports, sporting_events, streaming_services, ligue1, vg_franchises, vg_platforms, vg_publishers, cpg_brands, leagues_revenue, insurance, sephora_brands
 
 app = Flask(__name__)
 
@@ -217,6 +217,12 @@ TOOLS = [{'title': 'Best Hospitals (US)',
   'endpoint': 'beauty_brands_view',
   'available': True,
   'count': 5000},
+ {'title': 'Sephora Brands',
+  'category': 'Beauty',
+  'description': "Every brand in Sephora's A-Z brand directory (sephora.com/brands-list), each with its official Sephora page and social handles.",
+  'endpoint': 'sephora_brands_view',
+  'available': True,
+  'count': 347},
  {'title': 'Best Car Insurance Companies',
   'category': 'Insurance',
   'description': 'Top U.S. car insurance companies as rated by U.S. News & World Report (Travelers '
@@ -408,6 +414,22 @@ def beauty_brands_export():
     if fmt == "xlsx":
         return _send_xlsx(beauty_brands.columns(), rows, "Top Beauty Brands", base + ".xlsx")
     return _send_csv(beauty_brands.to_csv(rows), base + ".csv")
+
+@app.route("/sephora-brands")
+def sephora_brands_view():
+    live = request.args.get("live") in ("1", "true", "yes")
+    rows, meta = sephora_brands.get_brands(live=live)
+    return render_template("sephora-brands.html", rows=rows, meta=meta)
+
+@app.route("/sephora-brands/export")
+def sephora_brands_export():
+    fmt = request.args.get("fmt", "csv")
+    rows, meta = sephora_brands.get_brands()
+    stamp = _dt.date.today().isoformat()
+    base = "sephora_brands_{}".format(stamp)
+    if fmt == "xlsx":
+        return _send_xlsx(sephora_brands.columns(), rows, "Sephora Brands", base + ".xlsx")
+    return _send_csv(sephora_brands.to_csv(rows), base + ".csv")
 
 
 # ----------------------------------------------------------- National Football League
