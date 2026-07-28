@@ -6,8 +6,13 @@ appending to TOOLS and registering a new route + template.
 """
 import datetime as _dt
 import io
+import threading
+import time
+import uuid
 
-from flask import Flask, render_template, request, send_file, abort
+from flask import Flask, jsonify, render_template, request, send_file, abort
+
+from bdr_ingest import BdrIngestError, BdrIngestService
 
 from tools import best_hospitals, best_colleges, premier_league, saudi_pro_league, twitch_streamers, wnba_teams, motorsports, beauty_brands, nfl_teams, racquet_sports, golf_tours, nba_teams, nhl_teams, mls_teams, nwsl_teams, mlb_teams, milb_teams, brasileirao, bundesliga, laliga, serie_a, sp500, combat_sports, sporting_events, streaming_services, ligue1, vg_franchises, vg_platforms, vg_publishers, cpg_brands, leagues_revenue, insurance, sephora_brands, ulta_brands
 
@@ -228,7 +233,15 @@ TOOLS = [{'title': 'Best Hospitals (US)',
                  'rated Best Overall), with official website and social handles.',
   'endpoint': 'insurance_view',
   'available': True,
-  'count': 12}]
+  'count': 12},
+ {'title': 'BDR Ingest Report',
+  'category': 'Automation',
+  'description': 'Turn a list of titles into an ingest-ready BDR report using the same ingest '
+                 "templates as the Title Automation tool, matched to each title's category. "
+                 'Paste titles or upload a file.',
+  'endpoint': 'bdr_ingest_view',
+  'available': True,
+  'count': 0}]
 
 
 @app.context_processor
@@ -933,6 +946,108 @@ def _send_xlsx(cols, rows, sheet_title, filename):
         as_attachment=True,
         download_name=filename,
     )
+
+
+# ---------------------------------------------------------------- BDR Ingest Report
+# Reuses the Title Automation service's ingest-template logic via its API
+# (see bdr_ingest.py) instead of duplicating any generation code. Long-running,
+# so it runs in a background thread with a small in-memory job/artifact registry.
+_bdr_service = BdrIngestService()
+_BDR_JOBS = {}
+_BDR_ARTIFACTS = {}
+_BDR_LOCK = threading.Lock()
+_BDR_TTL = 6 * 3600
+
+
+def _bdr_prune():
+    now = time.time()
+    with _BDR_LOCK:
+        for store in (_BDR_JOBS, _BDR_ARTIFACTS):
+            for k in [k for k, v in store.items() if now - v.get("_ts", now) > _BDR_TTL]:
+                store.pop(k, None)
+
+
+def _bdr_set(jid, **kw):
+    with _BDR_LOCK:
+        job = _BDR_JOBS.setdefault(jid, {"_ts": time.time()})
+        job.update(kw)
+        job["_ts"] = time.time()
+
+
+def _bdr_run(jid, kwargs):
+    def progress(pct, msg):
+        _bdr_set(jid, percent=pct, message=msg)
+
+    try:
+        result = _bdr_service.generate(progress=progress, **kwargs)
+        aid = uuid.uuid4().hex
+        with _BDR_LOCK:
+            _BDR_ARTIFACTS[aid] = {
+                "filename": result["filename"],
+                "content": result["content"],
+                "media_type": result["media_type"],
+                "_ts": time.time(),
+            }
+        _bdr_set(jid, status="done", percent=100, message="Report ready",
+                 rows=result["row_count"], enriched=result["enriched_count"],
+                 artifact_id=aid, upstream=result["upstream"])
+    except BdrIngestError as exc:
+        _bdr_set(jid, status="error", percent=100, message=str(exc), error=str(exc))
+    except Exception as exc:  # noqa: BLE001
+        _bdr_set(jid, status="error", percent=100,
+                 message="Generation failed", error=str(exc))
+
+
+@app.route("/bdr-ingest")
+def bdr_ingest_view():
+    return render_template("bdr-ingest.html", upstream=_bdr_service.base_url)
+
+
+@app.route("/bdr-ingest/start", methods=["POST"])
+def bdr_ingest_start():
+    _bdr_prune()
+    bulk_text = request.form.get("bulk_text", "")
+    f = request.files.get("bulk_file")
+    file_content = f.read() if f and f.filename else None
+    filename = f.filename if f and f.filename else ""
+    if not file_content and not bulk_text.strip():
+        return jsonify({"error": "Paste at least one title or upload a file."}), 400
+
+    def _flag(name, default="true"):
+        return request.form.get(name, default).strip().lower() not in {"0", "false", "no", "off"}
+
+    kwargs = dict(
+        bulk_text=bulk_text,
+        file_content=file_content,
+        filename=filename,
+        title_type=request.form.get("title_type", "mixed"),
+        include_dar=_flag("include_dar"),
+        auto_fetch=_flag("auto_fetch"),
+        talent_profession=request.form.get("talent_profession", ""),
+    )
+    jid = uuid.uuid4().hex[:12]
+    _bdr_set(jid, status="running", percent=1, message="Starting")
+    threading.Thread(target=_bdr_run, args=(jid, kwargs), daemon=True).start()
+    return jsonify({"job_id": jid})
+
+
+@app.route("/bdr-ingest/status/<jid>")
+def bdr_ingest_status(jid):
+    with _BDR_LOCK:
+        job = _BDR_JOBS.get(jid)
+        if not job:
+            return jsonify({"error": "Unknown or expired job"}), 404
+        return jsonify({k: v for k, v in job.items() if not k.startswith("_")})
+
+
+@app.route("/bdr-ingest/download/<aid>")
+def bdr_ingest_download(aid):
+    with _BDR_LOCK:
+        art = _BDR_ARTIFACTS.get(aid)
+    if not art:
+        return "Generated report expired. Please generate it again.", 404
+    return send_file(io.BytesIO(art["content"]), mimetype=art["media_type"],
+                     as_attachment=True, download_name=art["filename"])
 
 
 if __name__ == "__main__":
