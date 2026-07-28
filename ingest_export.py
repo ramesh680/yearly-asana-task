@@ -91,6 +91,33 @@ def _gender_line(v: Any) -> str:
     return ""
 
 
+def _date(v: Any) -> str:
+    """Keep only a clean YYYY-MM-DD date; anything else is dropped."""
+    s = _s(v)
+    m = re.search(r"\d{4}-\d{2}-\d{2}", s)
+    return m.group(0) if m else ""
+
+
+def _distributor(v: Any) -> str:
+    """Distributor/network, with the scraper's placeholders treated as blank."""
+    s = _s(v)
+    return "" if s.lower() in {"n/a", "na", "unknown", "-", "tbd"} else s
+
+
+def _scale(v: Any) -> str:
+    """Wide / Limited release scale (feeds the Movies sub-category)."""
+    s = _s(v).title()
+    return s if s in {"Wide", "Limited"} else ""
+
+
+def _lang(v: Any) -> str:
+    """'English' -> 'en' so the TV sub-category picks Language Type - English."""
+    t = _s(v).lower()
+    if not t:
+        return ""
+    return "en" if "english" in t else "xx"
+
+
 def _first_of(v: Any) -> str:
     """First entry of a delimited list (e.g. 'singer, songwriter' -> 'singer')."""
     s = _s(v)
@@ -109,11 +136,18 @@ class IngestProfile:
     category  : the ingest title category ('Talent', 'Movies', 'TV Shows', ...)
     title_from: source column(s) holding the title/name -- first non-blank wins
     columns   : {ingest_column: source_column | (source_column, normalizer)}
+    dar_mode  : 'both' -> emit the owned (non-DAR) row AND its ' - DAR' twin
+                'dar'  -> emit the ' - DAR' row only
+                Ops rule: Movies and TV Shows get both versions; every other
+                category is DAR-only.
     """
 
     def __init__(self, category: str, title_from, columns: Optional[dict] = None,
-                 label: str = "") -> None:
+                 label: str = "", dar_mode: str = "") -> None:
         self.category = category
+        # default from the category, so new profiles follow the Ops rule
+        self.dar_mode = dar_mode or (
+            "both" if str(category).strip().lower() in {"movies", "tv shows"} else "dar")
         self.title_from = [title_from] if isinstance(title_from, str) else list(title_from)
         self.columns = columns or {}
         self.label = label or category
@@ -186,31 +220,88 @@ PROFILES: dict[str, IngestProfile] = {
         },
         label="Billboard Artist 100",
     ),
+    # Calendar tools (TV / Movies / Games) share one row shape:
+    #   Title Name | Studio/Publisher | Release Type | Genre | Release Date |
+    #   Availability / Network | Metacritic Score | Metacritic URL | ...
     "tv-premiere-calendar": IngestProfile(
         "TV Shows",
-        ["Title", "Show", "Series"],
+        ["Title Name", "Title", "Show", "Series"],
         {
-            "imdb_id": ("IMDb ttcode", _imdb),
-            "network": "Network",
-            "released_on": "Premiere Date",
-            "metacritic": ("Metacritic URL", _url),
+            "network": (["Availability / Network", "Studio/Publisher"], _s),
+            "released_on": (["Release Date"], _date),
+            "genre": (["Genre"], _s),
+            "metacritic": (["Metacritic URL"], _url),
+            "imdb_id": (["IMDb ttcode", "IMDb URL"], _imdb),
         },
         label="TV Premiere Calendar",
     ),
+    # The TV Season/Episode review snapshot uses snake_case column keys
+    # (title, release_date, network_distributor, imdb_id, program_type, ...),
+    # unlike the display-label calendars -- both spellings are listed so the
+    # profile works either way. Its metacritic_url is a slug GUESS, so it is
+    # not passed through (discovery resolves a verified one).
+    "tv-seasons": IngestProfile(
+        "TV Shows",
+        ["title", "Title", "Title Name", "Series"],
+        {
+            "network": (["network_distributor", "Availability / Network",
+                         "Studio/Publisher"], _distributor),
+            "released_on": (["release_date", "Release Date"], _date),
+            "imdb_id": (["imdb_id", "ttcode", "IMDb ttcode", "IMDb URL"], _imdb),
+            "program_type": (["program_type", "Release Type"], _s),
+            "original_language": (["language_type", "Language Type"], _lang),
+        },
+        label="TV Season & Episode Review",
+    ),
     "movie-release-calendar": IngestProfile(
         "Movies",
-        ["Title", "Movie"],
+        ["Title Name", "Title", "Movie"],
         {
-            "imdb_id": ("IMDb ttcode", _imdb),
-            "released_on": "Release Date",
-            "metacritic": ("Metacritic URL", _url),
+            "network": (["Studio/Publisher", "Distributor"], _s),
+            "released_on": (["Release Date"], _date),
+            "genre": (["Genre"], _s),
+            "metacritic": (["Metacritic URL"], _url),
+            "imdb_id": (["IMDb ttcode", "IMDb URL"], _imdb),
         },
         label="Movie Release Calendar",
     ),
+    "box-office": IngestProfile(
+        "Movies",
+        ["Title Name", "Title"],
+        {
+            "network": (["Distributor", "Studio/Publisher"], _s),
+            "released_on": (["Release Date"], _date),
+            "genre": (["Genre"], _s),
+            "imdb_id": (["IMDb ttcode", "IMDb URL"], _imdb),
+        },
+        label="Box Office",
+    ),
+    # Standalone upcoming-release-movies app (Box Office Mojo calendar).
+    # NOTE: its metacritic_url is an UNVERIFIED slug guess, so it is deliberately
+    # NOT passed through -- uploaded values are treated as authoritative and would
+    # skip verification. Discovery resolves a verified Metacritic URL instead.
+    "upcoming-release-movies": IngestProfile(
+        "Movies",
+        ["title", "Title", "Title Name"],
+        {
+            "imdb_id": (["imdb_url", "tt_code", "IMDb URL"], _imdb),
+            "released_on": (["release_date", "Release Date"], _date),
+            "network": (["distributor_network", "Distributor"], _distributor),
+            "genre": (["genre", "Genre"], _s),
+            # Wide/Limited drives 'Release - Wide|Limited' in title_sub_category
+            "release_scale": (["release_scale", "Scale"], _scale),
+        },
+        label="Upcoming Release Movies",
+    ),
     "game-release-calendar": IngestProfile(
         "Video Game",
-        ["Title", "Game"],
-        {"released_on": "Release Date", "metacritic": ("Metacritic URL", _url)},
+        ["Title Name", "Title", "Game"],
+        {
+            "network": (["Studio/Publisher"], _s),
+            "released_on": (["Release Date"], _date),
+            "genre": (["Genre"], _s),
+            "metacritic": (["Metacritic URL"], _url),
+        },
         label="Game Release Calendar",
     ),
 
@@ -321,8 +412,19 @@ def build_ingest_csv(rows: Iterable[dict], profile: IngestProfile) -> bytes:
     mapped = []
     for row in rows:
         ingest = profile.ingest_row(row)
-        if ingest.get(TITLE):
-            mapped.append(ingest)
+        base = _s(ingest.get(TITLE))
+        if not base:
+            continue
+        base = re.sub(r"\s*-\s*DAR\s*$", "", base, flags=re.I).strip()
+        if profile.dar_mode == "both":
+            # owned (non-DAR) row first, then its DAR twin -- the generator
+            # derives Competitive View vs Pristine DAR Brands from the suffix
+            owned = dict(ingest)
+            owned[TITLE] = base
+            mapped.append(owned)
+        dar = dict(ingest)
+        dar[TITLE] = f"{base} - DAR"
+        mapped.append(dar)
     if not mapped:
         raise BdrIngestError(
             "No usable titles were found in this report, so there is nothing to "
@@ -376,3 +478,31 @@ def convert_rows_to_ingest(
     result["source_label"] = f"{profile.label} -> {profile.category} ingest template"
     result["category"] = profile.category
     return result
+
+
+# --- media-tools-hub: tracker_type -> ingest profile ---------------------------
+# Every tool whose output maps cleanly onto ONE title category appears here, so
+# the shared export route can offer an "Ingest Template" download. Tools whose
+# rows span several categories (the verifiers) are deliberately absent -- no
+# button is shown rather than guessing a category.
+TRACKER_INGEST = {
+    "billboard_artist_100": "billboard-artist-100",
+    "tv": "tv-premiere-calendar",
+    "tv_seasons": "tv-seasons",
+    "movie": "movie-release-calendar",
+    "game": "game-release-calendar",
+    "boxoffice": "box-office",
+    "boxoffice_recent_opening": "box-office",
+    "release_schedule_changes": "movie-release-calendar",
+}
+
+
+def ingest_slug_for_tracker(tracker_type: str) -> Optional[str]:
+    """Profile slug for a tracker run, or None when the tool's rows do not map
+    to a single ingest category (so no Ingest Template button is offered)."""
+    return TRACKER_INGEST.get(str(tracker_type or "").strip().lower())
+
+
+def ingest_category_for_tracker(tracker_type: str) -> str:
+    slug = ingest_slug_for_tracker(tracker_type)
+    return PROFILES[slug].category if slug else ""
