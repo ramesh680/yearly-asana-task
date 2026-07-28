@@ -50,11 +50,12 @@
       <button class="tab-btn" data-filter="sports" onclick="filterByCategory('sports')">Sports</button>
       <button class="tab-btn" data-filter="streaming" onclick="filterByCategory('streaming')">Streaming</button>
       <button class="tab-btn" data-filter="beauty" onclick="filterByCategory('beauty')">Beauty</button>
+      <button class="tab-btn" data-filter="automation" onclick="filterByCategory('automation')">Automation</button>
     </div>
 
     <!-- Tools Container (grouped by section) -->
     <div id="toolsContainer">
-      {% set cats = ['Healthcare', 'Education', 'Finance', 'Insurance', 'Sports', 'Streaming', 'Beauty'] %}
+      {% set cats = ['Healthcare', 'Education', 'Finance', 'Insurance', 'Sports', 'Streaming', 'Beauty', 'Automation'] %}
       {% for cat in cats %}
         {% set cat_tools = tools | selectattr('category', 'equalto', cat) | list %}
         {% if cat_tools %}
