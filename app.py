@@ -977,6 +977,7 @@ INGEST_SOURCES = {
     "best-hospitals": lambda: best_hospitals.get_hospitals("newsweek")[0],
     "best-colleges": lambda: best_colleges.get_colleges()[0],
     "sp500": lambda: sp500.get_rows()[0],
+    "russell-3000": lambda: _russell_rows(),
     "insurance": lambda: insurance.get_rows()[0],
     "golf-tours": lambda: golf_tours.get_rows()[0],
     "combat-sports": lambda: combat_sports.get_rows()[0],
@@ -992,15 +993,32 @@ INGEST_SOURCES = {
 }
 
 
+def _russell_rows():
+    """Russell 3000 is rendered from a pre-built static page; its rows live in
+    the enriched JSON that the refresh script produces."""
+    import json
+    import os
+    path = os.path.join(app.root_path, "data", "russell_3000.json")
+    with open(path, encoding="utf-8") as fh:
+        return json.load(fh)
+
+
 @app.route("/ingest/<slug>")
 def ingest_export_view(slug):
-    """Download this tool's output as an ingest-template .xlsx."""
+    """Download this tool's output as an ingest-template .xlsx.
+
+    ?enrich=0 skips the auto-discovery step. Worth using on the very large
+    lists (Russell 3000 is ~2,500 rows) where the tool already supplies the
+    website / Wikipedia / social links and enrichment would add many minutes.
+    """
     getter = INGEST_SOURCES.get(slug)
     if getter is None:
         abort(404)
+    enrich = str(request.args.get("enrich", "1")).strip().lower() not in {"0", "false", "no", "off"}
     try:
         rows = getter()
-        result = convert_rows_to_ingest(rows, slug, service=_bdr_service)
+        result = convert_rows_to_ingest(rows, slug, service=_bdr_service,
+                                        enrich=enrich)
     except BdrIngestError as exc:
         return (
             "<p>Could not build the ingest template: {}</p>"

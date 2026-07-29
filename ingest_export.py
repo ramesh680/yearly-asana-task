@@ -204,7 +204,7 @@ def _get_ci(row: dict, col: str) -> Any:
 # The yearly tools store socials under short keys ('twitter') and export them
 # under display labels ('X / Twitter'); list both so one profile handles either.
 _WIKI = ["wikipedia", "Wikipedia", "Wikipedia URL"]
-_TW = ["twitter", "X / Twitter", "Twitter"]
+_TW = ["twitter", "X / Twitter", "Twitter", "X"]
 _IG = ["instagram", "Instagram"]
 _FB = ["facebook", "Facebook"]
 _YT = ["youtube", "YouTube"]
@@ -479,6 +479,9 @@ PROFILES.update({
                              "Video Game Platforms", company_from=["maker", "Maker"]),
     "vg-publishers": _general(["publisher", "Publisher"], "Video Game Publishers",
                               "Video Game Publishers"),
+    "russell-3000": _general(["Company", "company"], "Financial Services",
+                             "Russell 3000", genres_from=["Sector", "sector"],
+                             ticker_from=["Ticker", "ticker"]),
     # ---- CPG ----
     "cpg-brands": _general(["brand", "Brand"], "CPG", "CPG Brands",
                            company_from=["parent", "Parent"]),
