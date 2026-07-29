@@ -953,11 +953,42 @@ _bdr_service = BdrIngestService()
 #
 # To add a tool: add its rows-getter here and a profile in ingest_export.PROFILES.
 INGEST_SOURCES = {
+    # ---- Talent / Health & Beauty / Sports Franchise (first-class categories)
     "twitch-streamers": lambda: twitch_streamers.get_streamers()[0],
     "sephora-brands": lambda: sephora_brands.get_brands()[0],
     "ulta-brands": lambda: ulta_brands.get_brands()[0],
+    "beauty-brands": lambda: beauty_brands.get_brands()[0],
     "premier-league": lambda: premier_league.get_clubs()[0],
+    "saudi-pro-league": lambda: saudi_pro_league.get_clubs()[0],
     "nba-teams": lambda: nba_teams.get_rows()[0],
+    "nfl-teams": lambda: nfl_teams.get_teams()[0],
+    "nhl-teams": lambda: nhl_teams.get_rows()[0],
+    "mls-teams": lambda: mls_teams.get_rows()[0],
+    "nwsl-teams": lambda: nwsl_teams.get_rows()[0],
+    "mlb-teams": lambda: mlb_teams.get_rows()[0],
+    "milb-teams": lambda: milb_teams.get_rows()[0],
+    "wnba-teams": lambda: wnba_teams.get_teams()[0],
+    "brasileirao": lambda: brasileirao.get_rows()[0],
+    "bundesliga": lambda: bundesliga.get_rows()[0],
+    "laliga": lambda: laliga.get_rows()[0],
+    "ligue1": lambda: ligue1.get_rows()[0],
+    "serie-a": lambda: serie_a.get_rows()[0],
+    # ---- everything else uses the GENERAL ingest template -------------------
+    "best-hospitals": lambda: best_hospitals.get_hospitals("newsweek")[0],
+    "best-colleges": lambda: best_colleges.get_colleges()[0],
+    "sp500": lambda: sp500.get_rows()[0],
+    "insurance": lambda: insurance.get_rows()[0],
+    "golf-tours": lambda: golf_tours.get_rows()[0],
+    "combat-sports": lambda: combat_sports.get_rows()[0],
+    "racquet-sports": lambda: racquet_sports.get_sports()[0],
+    "motorsports": lambda: motorsports.get_motorsports()[0],
+    "leagues-revenue": lambda: leagues_revenue.get_rows()[0],
+    "sporting-events": lambda: sporting_events.get_rows()[0],
+    "streaming-services": lambda: streaming_services.get_rows()[0],
+    "vg-franchises": lambda: vg_franchises.get_rows()[0],
+    "vg-platforms": lambda: vg_platforms.get_rows()[0],
+    "vg-publishers": lambda: vg_publishers.get_rows()[0],
+    "cpg-brands": lambda: cpg_brands.get_rows()[0],
 }
 
 

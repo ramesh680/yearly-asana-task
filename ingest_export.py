@@ -143,8 +143,13 @@ class IngestProfile:
     """
 
     def __init__(self, category: str, title_from, columns: Optional[dict] = None,
-                 label: str = "", dar_mode: str = "") -> None:
-        self.category = category
+                 label: str = "", dar_mode: str = "",
+                 general_category: str = "") -> None:
+        # A general_category routes the rows through the GENERAL ingest template
+        # (title_category comes from its 49-item master list, and the row uses
+        # the General template's own column names).
+        self.general_category = general_category
+        self.category = "General" if general_category else category
         # default from the category, so new profiles follow the Ops rule
         self.dar_mode = dar_mode or (
             "both" if str(category).strip().lower() in {"movies", "tv shows"} else "dar")
@@ -160,7 +165,13 @@ class IngestProfile:
         return ""
 
     def ingest_row(self, row: dict) -> dict:
-        out = {TITLE: self.title_of(row), CATEGORY: self.category}
+        if self.general_category:
+            # General template: the master-list category goes in its own
+            # 'Title Category' column; no title_category column is emitted, so
+            # the generator routes on the General title type.
+            out = {TITLE: self.title_of(row), "Title Category": self.general_category}
+        else:
+            out = {TITLE: self.title_of(row), CATEGORY: self.category}
         for target, source in self.columns.items():
             norm: Optional[Callable] = None
             if isinstance(source, tuple):
@@ -396,6 +407,114 @@ for _slug, (_label, _title_cols) in _SPORTS_TOOLS.items():
     )
 
 
+
+# --- General ingest template ---------------------------------------------------
+# Everything that is not Talent / Health & Beauty / Sports Franchise goes through
+# the GENERAL ingest template. Its columns are named as in that template
+# (Wikipedia / Facebook / Twitter / ...), and each tool supplies a Title Category
+# from the template's 49-item master list.
+_GENERAL_COLUMNS = {
+    "Wikipedia": (_WIKI, _url),
+    "Facebook": (_FB, _url),
+    "Instagram": (_IG, _url),
+    "Twitter": (_TW, _url),
+    "YouTube": (_YT, _url),
+    "TikTok": (_TT, _url),
+    "LinkedIn": (_LI, _url),
+}
+
+
+def _general(title_from, master_category: str, label: str,
+             company_from=None, genres_from=None, ticker_from=None,
+             brand_sets: str = "") -> IngestProfile:
+    """brand_sets: the General template has NO default brand set (unlike Beauty /
+    Sports), so brand_set comes out blank unless Ops supplies one here. Set it
+    per tool once the value is confirmed and it flows straight through."""
+    cols = dict(_GENERAL_COLUMNS)
+    if brand_sets:
+        cols["Brand Sets"] = ([title_from[0] if isinstance(title_from, list) else title_from],
+                              lambda _v, _b=brand_sets: _b)
+    if company_from:
+        cols["Company"] = (company_from, _distributor)
+    if genres_from:
+        cols["Genres"] = (genres_from, _s)
+    if ticker_from:
+        cols["Ticker Symbol"] = (ticker_from, _s)
+    return IngestProfile("General", title_from, cols, label=label,
+                         general_category=master_category)
+
+
+PROFILES.update({
+    # ---- Healthcare / Education ----
+    "best-hospitals": _general(["hospital", "Hospital"], "Hospital & Health Care",
+                               "Best Hospitals (US)"),
+    "best-colleges": _general(["university", "University"], "Education",
+                              "Best Colleges (US)"),
+    # ---- Finance / Insurance ----
+    "sp500": _general(["company", "Company"], "Financial Services", "S&P 500",
+                      genres_from=["sector", "Sector"], ticker_from=["ticker", "Ticker"]),
+    "insurance": _general(["company", "Company"], "Insurance",
+                          "Best Car Insurance Companies"),
+    # ---- Sports bodies / events (teams stay Sports Franchise) ----
+    "golf-tours": _general(["tour", "Tour"], "Sports Organizations and Bodies",
+                           "Golf Tours", genres_from=["region", "Region"]),
+    "combat-sports": _general(["sport", "Sport"], "Sports Organizations and Bodies",
+                              "Combat Sports", company_from=["governing_body"]),
+    "racquet-sports": _general(["sport", "Sport"], "Sports Organizations and Bodies",
+                               "Racquet Sports", company_from=["governing_body"]),
+    "motorsports": _general(["series", "Series"], "Sports Organizations and Bodies",
+                            "Top Motorsports", genres_from=["category", "Category"]),
+    "leagues-revenue": _general(["league", "League"], "Sports Organizations and Bodies",
+                                "Sports Leagues by Revenue",
+                                genres_from=["sport", "Sport"]),
+    "sporting-events": _general(["event", "Event"], "Venues, Events & Attractions",
+                                "Sporting Events", genres_from=["sport", "Sport"]),
+    # ---- Media / Streaming / Games ----
+    "streaming-services": _general(["service", "Service"], "Media",
+                                   "Streaming Services", genres_from=["type", "Type"]),
+    "vg-franchises": _general(["franchise", "Franchise"], "Video Game",
+                              "Video Game Franchises",
+                              company_from=["publisher", "Publisher"]),
+    "vg-platforms": _general(["platform", "Platform"], "Consumer Electronics",
+                             "Video Game Platforms", company_from=["maker", "Maker"]),
+    "vg-publishers": _general(["publisher", "Publisher"], "Video Game Publishers",
+                              "Video Game Publishers"),
+    # ---- CPG ----
+    "cpg-brands": _general(["brand", "Brand"], "CPG", "CPG Brands",
+                           company_from=["parent", "Parent"]),
+})
+
+# The remaining team tools share the Sports Franchise shape already piloted on
+# Premier League / NBA (kept as a first-class category, not General).
+for _slug, (_label, _cols) in {
+    "nfl-teams": ("NFL Teams", ["team", "Team"]),
+    "nhl-teams": ("NHL Teams", ["team", "Team"]),
+    "mls-teams": ("MLS Teams", ["team", "Team"]),
+    "nwsl-teams": ("NWSL Teams", ["team", "Team"]),
+    "mlb-teams": ("MLB Teams", ["team", "Team"]),
+    "milb-teams": ("MiLB Teams", ["team", "Team"]),
+    "wnba-teams": ("WNBA Teams", ["team", "Team"]),
+    "saudi-pro-league": ("Saudi Pro League", ["club", "team", "Club", "Team"]),
+    "brasileirao": ("Brasileirao", ["team", "club", "Team", "Club"]),
+    "bundesliga": ("Bundesliga", ["team", "club", "Team", "Club"]),
+    "laliga": ("LaLiga", ["team", "club", "Team", "Club"]),
+    "ligue1": ("Ligue 1", ["team", "club", "Team", "Club"]),
+    "serie-a": ("Serie A", ["team", "club", "Team", "Club"]),
+}.items():
+    PROFILES[_slug] = IngestProfile(
+        "Sports Franchise", _cols,
+        {
+            "wikipedia_page": (_WIKI, _url),
+            "twitter_handle": (_TW, _handle),
+            "instagram_user": (_IG, _handle),
+            "facebook_page": (_FB, _url),
+            "youtube_channel_username": (_YT, _url),
+            "tiktok_user": (_TT, _handle),
+        },
+        label=_label,
+    )
+
+
 def profile_for(slug: str) -> IngestProfile:
     p = PROFILES.get(slug)
     if p is None:
@@ -432,7 +551,7 @@ def build_ingest_csv(rows: Iterable[dict], profile: IngestProfile) -> bytes:
         )
     # stable column order; always include a social column so the upstream
     # generator takes the full-schema path and honours our explicit values
-    cols: list[str] = [TITLE, CATEGORY]
+    cols: list[str] = [TITLE] if profile.general_category else [TITLE, CATEGORY]
     for m in mapped:
         for k in m:
             if k not in cols:
