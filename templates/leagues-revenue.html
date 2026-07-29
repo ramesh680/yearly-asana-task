@@ -10,7 +10,8 @@
   <p class="muted note">Social links are auto-generated from the league name (best-guess); Wikipedia mapped where known.</p>
   <div class="exports">
     <a class="btn" href="{{ url_for('leagues_revenue_export', fmt='csv') }}">Download CSV</a>
-    <a class="btn ghost" href="{{ url_for('leagues_revenue_export', fmt='xlsx') }}">Download Excel</a></div>
+    <a class="btn ghost" href="{{ url_for('leagues_revenue_export', fmt='xlsx') }}">Download Excel</a>
+    <a class="btn ghost" href="/ingest/leagues-revenue" title="Convert this report into a Sports Organizations and Bodies ingest template using the Title Automation ingest logic">Download Ingest Template (Sports Organizations and Bodies)</a></div>
   <div class="table-scroll"><table class="data"><thead><tr>
     <th class="num">#</th><th>League</th><th>Sport</th><th>Country</th><th>Website</th>
     {% for field, label in meta.social_fields %}<th>{{ label }}</th>{% endfor %}<th>Wikipedia</th>

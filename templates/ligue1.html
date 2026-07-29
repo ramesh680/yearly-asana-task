@@ -10,7 +10,8 @@
   <p class="muted note">Social links are verified where known and auto-generated from the name/handle otherwise (best-guess).</p>
   <div class="exports">
     <a class="btn" href="{{ url_for('ligue1_export', fmt='csv') }}">Download CSV</a>
-    <a class="btn ghost" href="{{ url_for('ligue1_export', fmt='xlsx') }}">Download Excel</a></div>
+    <a class="btn ghost" href="{{ url_for('ligue1_export', fmt='xlsx') }}">Download Excel</a>
+    <a class="btn ghost" href="/ingest/ligue1" title="Convert this report into a Sports Franchise ingest template using the Title Automation ingest logic">Download Ingest Template (Sports Franchise)</a></div>
   <div class="table-scroll"><table class="data"><thead><tr>
     <th class="num">#</th><th>Club</th><th>City</th><th>Stadium</th><th>Website</th>
     {% for field, label in meta.social_fields %}<th>{{ label }}</th>{% endfor %}<th>Wikipedia</th>

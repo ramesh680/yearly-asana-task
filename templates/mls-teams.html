@@ -13,6 +13,7 @@
   <div class="exports">
     <a class="btn" href="{{ url_for('mls_teams_export', fmt='csv') }}">Download CSV</a>
     <a class="btn ghost" href="{{ url_for('mls_teams_export', fmt='xlsx') }}">Download Excel</a>
+    <a class="btn ghost" href="/ingest/mls-teams" title="Convert this report into a Sports Franchise ingest template using the Title Automation ingest logic">Download Ingest Template (Sports Franchise)</a>
   </div>
   <div class="table-scroll"><table class="data"><thead><tr>
     <th class="num">#</th><th>Club</th><th>Conf</th><th>City</th><th>Stadium</th><th>Website</th>

@@ -30,6 +30,7 @@
   <div class="exports">
     <a class="btn" href="{{ url_for('best_hospitals_export', source=meta.source, fmt='csv') }}">Download CSV</a>
     <a class="btn ghost" href="{{ url_for('best_hospitals_export', source=meta.source, fmt='xlsx') }}">Download Excel</a>
+    <a class="btn ghost" href="/ingest/best-hospitals" title="Convert this report into a Hospital & Health Care ingest template using the Title Automation ingest logic">Download Ingest Template (Hospital & Health Care)</a>
   </div>
 
   <div class="table-scroll">

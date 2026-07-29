@@ -10,7 +10,8 @@
   <p class="muted note">Social links are verified where known and auto-generated from the name/handle otherwise (best-guess).</p>
   <div class="exports">
     <a class="btn" href="{{ url_for('cpg_brands_export', fmt='csv') }}">Download CSV</a>
-    <a class="btn ghost" href="{{ url_for('cpg_brands_export', fmt='xlsx') }}">Download Excel</a></div>
+    <a class="btn ghost" href="{{ url_for('cpg_brands_export', fmt='xlsx') }}">Download Excel</a>
+    <a class="btn ghost" href="/ingest/cpg-brands" title="Convert this report into a CPG ingest template using the Title Automation ingest logic">Download Ingest Template (CPG)</a></div>
   <div class="table-scroll"><table class="data"><thead><tr>
     <th class="num">#</th><th>Brand</th><th>Parent Company</th><th>Website</th>
     {% for field, label in meta.social_fields %}<th>{{ label }}</th>{% endfor %}<th>Wikipedia</th>
