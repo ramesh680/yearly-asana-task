@@ -22,7 +22,7 @@ tbody td{padding:9px 10px;border-top:1px solid var(--line);vertical-align:top}tb
 <div class="card"><span class="chip">Russell 3000 Index</span>
 <span class="meta">&nbsp; Constituents via iShares Russell 3000 ETF (IWV) holdings &nbsp;&middot;&nbsp; <b id="cnt"></b> companies &nbsp;&middot;&nbsp; <b id="scnt"></b> with social accounts &nbsp;&middot;&nbsp; <b>Data as of 2026-06-23</b></span>
 <div class="meta" style="margin-top:8px">Ranked by index weight. Top 640 fully verified; remainder auto-enriched and flagged. Refreshed annually after the June reconstitution.</div>
-<div class="btns"><button class="btn" onclick="dl('csv')">Download CSV</button><button class="btn sec" onclick="dl('xls')">Download Excel</button></div></div>
+<div class="btns"><button class="btn" onclick="dl('csv')">Download CSV</button><button class="btn sec" onclick="dl('xls')">Download Excel</button><a class="btn sec" href="/ingest/russell-3000?enrich=0" title="Convert this list into a Financial Services (General) ingest template. Enrichment is skipped by default because this list is ~2,500 rows; drop ?enrich=0 from the URL for a slower, enriched run.">Download Ingest Template (Financial Services)</a></div></div>
 <div class="controls"><input id="q" placeholder="Search company, ticker, or sector&hellip;" oninput="render()">
 <select id="sec" onchange="render()"><option value="">All sectors</option></select>
 <select id="conf" onchange="render()"><option value="">All confidence</option><option>Verified</option><option>Auto-enriched</option></select>
