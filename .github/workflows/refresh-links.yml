@@ -1,0 +1,61 @@
+name: Refresh links
+
+# Re-checks every tool's website, Wikipedia and social links against the live
+# websites, Wikipedia and Wikidata, then commits data/link_refresh.json (which
+# the app applies on top of the curated snapshots) plus a change report.
+# Runs on the 1st of every month, and any time from the Actions tab.
+on:
+  schedule:
+    - cron: "15 3 1 * *"      # 03:15 UTC (08:45 IST) on the 1st of each month
+  workflow_dispatch:
+    inputs:
+      tools:
+        description: "Only these tools, comma-separated (e.g. nba_teams,laliga). Leave blank for all."
+        required: false
+        default: ""
+
+permissions:
+  contents: write             # allow the job to commit refreshed data back
+
+concurrency:
+  group: refresh-links
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Refresh links
+        env:
+          TOOLS: ${{ github.event.inputs.tools }}
+        run: |
+          if [ -n "$TOOLS" ]; then
+            python scripts/refresh_links.py --tools "$TOOLS"
+          else
+            python scripts/refresh_links.py
+          fi
+
+      - name: Commit refreshed links
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/link_refresh.json data/link_refresh_report.csv
+          if git diff --cached --quiet; then
+            echo "No link changes."
+            exit 0
+          fi
+          git commit -m "Refresh website / Wikipedia / social links ($(date -u +%Y-%m-%d))"
+          git pull --rebase origin "${GITHUB_REF_NAME}"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
