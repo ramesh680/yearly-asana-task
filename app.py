@@ -13,6 +13,11 @@ from bdr_ingest import BdrIngestError, BdrIngestService
 from ingest_export import convert_rows_to_ingest
 
 from tools import best_hospitals, best_colleges, premier_league, saudi_pro_league, twitch_streamers, wnba_teams, motorsports, beauty_brands, nfl_teams, racquet_sports, golf_tours, nba_teams, nhl_teams, mls_teams, nwsl_teams, mlb_teams, milb_teams, brasileirao, bundesliga, laliga, serie_a, sp500, combat_sports, sporting_events, streaming_services, ligue1, vg_franchises, vg_platforms, vg_publishers, cpg_brands, leagues_revenue, insurance, sephora_brands, ulta_brands
+from tools import link_refresh
+
+# Apply refreshed website / Wikipedia / social links (data/link_refresh.json)
+# on top of every tool's curated snapshot. See scripts/refresh_links.py.
+link_refresh.install()
 
 app = Flask(__name__)
 
